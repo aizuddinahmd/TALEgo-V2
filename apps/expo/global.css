@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- THEME ENGINE: CLASSIC --- */
+.theme-classic {
+  --bg-primary: #09090b;
+  --bg-secondary: #0F0F0F;
+  --accent-glow: 0px 0px 0px transparent;
+}
+/* --- THEME ENGINE: NEO --- */
+.theme-neo {
+  background-color: #000000;
+  --accent-glow: 0 0 15px rgba(212, 175, 55, 0.15);
+}
+.theme-neo div[class*="bg-zinc-900"],
+.theme-neo div[class*="bg-black/40"] {
+  background: rgba(10, 10, 10, 0.4) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.theme-neo div[class*="bg-zinc-900"]:hover,
+.theme-neo div[class*="bg-black/40"]:hover {
+  transform: translateY(-2px) scale(1.005);
+  border-color: rgba(212, 175, 55, 0.3) !important;
+  box-shadow: 0 10px 40px -10px rgba(212, 175, 55, 0.15);
+}
+.theme-neo h1,
+.theme-neo h2,
+.theme-neo h3,
+.theme-neo .text-brand-gold {
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+/* --- LIGHT MODE OVERRIDES --- */
+.light-mode {
+  background-color: #f4f4f5 !important;
+  color: #18181b !important;
+}
+.light-mode .text-white { color: #18181b !important; }
+.light-mode .text-zinc-400 { color: #71717a !important; }
+.light-mode .text-zinc-500 { color: #a1a1aa !important; }
+.light-mode div[class*="bg-black"],
+.light-mode div[class*="bg-zinc-900"] {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+.light-mode.theme-neo {
+  background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f5 100%) !important;
+  --accent-glow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+.light-mode.theme-neo div[class*="bg-zinc-900"] {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
+  box-shadow: 0 10px 30px -5px rgba(212, 175, 55, 0.15);
+}
+.light-mode.theme-neo h1,
+.light-mode.theme-neo h2,
+.light-mode.theme-neo h3,
+.light-mode.theme-neo .text-brand-gold {
+  color: #b45309 !important;
+  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
