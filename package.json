@@ -36,6 +36,11 @@
     "singleQuote": true
   },
   "dependencies": {
-    "nativewind": "^4.1.23"
+    "@react-navigation/bottom-tabs": "^7.14.0",
+    "framer-motion": "^12.34.3",
+    "lucide-react": "^0.575.0",
+    "lucide-react-native": "^0.575.0",
+    "nativewind": "^4.1.23",
+    "react-native-svg": "^15.15.3"
   }
 }

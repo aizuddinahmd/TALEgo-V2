@@ -1,6 +1,7 @@
 import { Provider } from 'app/provider'
 import { StylesProvider } from './styles-provider'
 import '../app/globals.css'
+import { Sidebar } from 'app/components/navigation/sidebar.web'
 
 export const metadata = {
   title: 'Create Solito App',
@@ -16,7 +17,17 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <StylesProvider>
-          <Provider>{children}</Provider>
+          <Provider>
+            <div className="flex h-screen w-full text-white selection:bg-brand-gold selection:text-black overflow-hidden relative">
+              <Sidebar />
+              {/* Main Content Area */}
+              <div className="flex-1 flex flex-col relative z-10 h-full overflow-y-auto">
+                <main className="flex-1 w-full relative">
+                  {children}
+                </main>
+              </div>
+            </div>
+          </Provider>
         </StylesProvider>
       </body>
     </html>
