@@ -6,6 +6,7 @@ import { Home, FileText, Zap, Inbox, User } from 'lucide-react-native'
 
 import { HomeScreen } from 'app/features/home/screen'
 import { UserDetailScreen } from 'app/features/user/detail-screen'
+import { PayrollScreen } from 'app/features/payroll/screen'
 import { useTheme } from 'app/provider/theme'
 
 // Dummy screen for placeholders
@@ -30,6 +31,7 @@ const Tab = createBottomTabNavigator<{
 const Stack = createNativeStackNavigator<{
   tabs: undefined
   'user-detail': { id: string }
+  payroll: undefined
 }>()
 
 function TabNavigator() {
@@ -111,6 +113,16 @@ export function NativeNavigation() {
         options={{
           headerShown: true,
           title: 'User',
+          headerStyle: { backgroundColor: isDark ? '#18181b' : '#ffffff' },
+          headerTintColor: isDark ? '#fff' : '#000',
+        }}
+      />
+      <Stack.Screen
+        name="payroll"
+        component={PayrollScreen}
+        options={{
+          headerShown: true,
+          title: 'Payroll',
           headerStyle: { backgroundColor: isDark ? '#18181b' : '#ffffff' },
           headerTintColor: isDark ? '#fff' : '#000',
         }}
