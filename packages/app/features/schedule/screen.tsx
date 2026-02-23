@@ -18,6 +18,13 @@ const WEEK_DATES = [
   { dayName: 'Fri', dayNumber: '27', fullDate: '2026-02-27' },
   { dayName: 'Sat', dayNumber: '28', fullDate: '2026-02-28' },
   { dayName: 'Sun', dayNumber: '01', fullDate: '2026-03-01' },
+  { dayName: 'Mon', dayNumber: '02', fullDate: '2026-03-02' },
+  { dayName: 'Tue', dayNumber: '03', fullDate: '2026-03-03' },
+  { dayName: 'Wed', dayNumber: '04', fullDate: '2026-03-04' },
+  { dayName: 'Thu', dayNumber: '05', fullDate: '2026-03-05' },
+  { dayName: 'Fri', dayNumber: '06', fullDate: '2026-03-06' },
+  { dayName: 'Sat', dayNumber: '07', fullDate: '2026-03-07' },
+  { dayName: 'Sun', dayNumber: '08', fullDate: '2026-03-08' },
 ];
 
 const getStatusBadgeStyles = (status: string) => {
@@ -77,22 +84,22 @@ export function ScheduleScreen() {
           <View>
             <Text className="text-3xl font-bold tracking-tight text-slate-800 dark:text-white mb-2">My Schedule</Text>
             <View className="flex-row items-center gap-2">
-              <View className="bg-blue-100 dark:bg-blue-900/30 px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-800/50 flex-row items-center gap-1.5">
-                <Clock size={14} className="text-blue-600 dark:text-blue-400" />
-                <Text className="text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wider">Total this week: {totalHoursThisWeek}</Text>
+              <View className="bg-amber-100 dark:bg-amber-900/30 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800/50 flex-row items-center gap-1.5">
+                <Clock size={14} className="text-amber-600 dark:text-amber-400" />
+                <Text className="text-amber-700 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">Total this week: {totalHoursThisWeek}</Text>
               </View>
             </View>
           </View>
 
           {/* Action Buttons */}
           <View className="flex-row items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-            <TouchableOpacity className="flex-1 md:flex-none border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-lg px-4 py-3 flex-row items-center justify-center gap-2 shadow-sm">
+            <TouchableOpacity className="flex-1 md:flex-none border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1A1A1A] rounded-lg px-4 py-3 flex-row items-center justify-center gap-2 shadow-sm">
               <RefreshCw size={16} className="text-slate-600 dark:text-zinc-300" />
               <Text className="text-slate-700 dark:text-zinc-200 font-bold text-sm">Swap</Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 md:flex-none bg-blue-600 dark:bg-blue-500 rounded-lg px-5 py-3 flex-row items-center justify-center gap-2 shadow-sm active:bg-blue-700">
-              <Send size={16} color="white" />
-              <Text className="text-white font-bold text-sm">Apply for Leave</Text>
+            <TouchableOpacity className="flex-1 md:flex-none bg-amber-400 hover:bg-amber-500 rounded-lg px-5 py-3 flex-row items-center justify-center gap-2 shadow-sm active:opacity-80">
+              <Send size={16} color="black" />
+              <Text className="text-black font-bold text-sm">Apply for Leave</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -109,14 +116,14 @@ export function ScheduleScreen() {
                   onPress={() => setSelectedDate(dateObj.fullDate)}
                   className={`items-center justify-center rounded-xl py-3 px-4 min-w-[70px] border shadow-sm ${
                     isSelected
-                      ? 'bg-blue-600 border-blue-600 dark:bg-blue-600 dark:border-blue-500'
-                      : 'bg-white border-slate-200 dark:bg-zinc-900 dark:border-zinc-800'
+                      ? 'bg-amber-400 border-amber-400'
+                      : 'bg-white border-slate-200 dark:bg-[#1A1A1A] dark:border-white/5'
                   }`}
                 >
-                  <Text className={`text-xs font-medium mb-1 ${isSelected ? 'text-blue-100' : 'text-slate-500 dark:text-zinc-400'}`}>
+                  <Text className={`text-xs font-medium mb-1 ${isSelected ? 'text-black' : 'text-slate-500 dark:text-zinc-400'}`}>
                     {dateObj.dayName}
                   </Text>
-                  <Text className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-slate-800 dark:text-white'}`}>
+                  <Text className={`text-lg font-bold ${isSelected ? 'text-black' : 'text-slate-800 dark:text-white'}`}>
                     {dateObj.dayNumber}
                   </Text>
                 </TouchableOpacity>
@@ -124,7 +131,7 @@ export function ScheduleScreen() {
             })}
             
             {/* View Calendar Button (For Web or extended mobile) */}
-            <TouchableOpacity className="items-center justify-center rounded-xl py-3 px-4 min-w-[70px] bg-slate-100 border border-slate-200 dark:bg-zinc-800 dark:border-zinc-700 ml-2 shadow-sm">
+            <TouchableOpacity className="items-center justify-center rounded-xl py-3 px-4 min-w-[70px] bg-slate-100 border border-slate-200 dark:bg-[#1A1A1A] dark:border-white/5 ml-2 shadow-sm">
               <CalendarIcon size={20} className="text-slate-500 dark:text-zinc-400 mb-1" />
               <Text className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase">Picker</Text>
             </TouchableOpacity>
@@ -157,63 +164,65 @@ export function ScheduleScreen() {
               </View>
 
               {/* Web / Desktop View: Data Table (Hidden on small screens) */}
-              <View className="hidden md:flex bg-white dark:bg-[#1A1A1A] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm">
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View className="min-w-[800px] w-full">
+              <View className="hidden md:flex flex-1 bg-white dark:bg-[#1A1A1A] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm mt-4">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1 w-full">
+                  <View className="min-w-[800px] w-full flex-1">
                     {/* Table Header */}
-                    <View className="flex-row items-center border-b border-slate-200 dark:border-white/5 px-4 py-3 bg-slate-50 dark:bg-[#222222] w-full">
+                    <View className="flex-row items-center border-b border-slate-200 dark:border-white/5 px-4 py-3 bg-slate-50 dark:bg-[#222222]">
                       <View className="flex-[1.5]"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Date & Time</Text></View>
-                      <View className="w-24"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Duration</Text></View>
+                      <View className="flex-[1]"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Duration</Text></View>
                       <View className="flex-[2]"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Role & Location</Text></View>
-                      <View className="w-32"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Status</Text></View>
-                      <View className="w-32 items-center"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Actions</Text></View>
+                      <View className="flex-[1]"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Status</Text></View>
+                      <View className="flex-[1]"><Text className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Actions</Text></View>
                     </View>
 
                     {/* Table Rows */}
-                    {filteredShifts.map((item) => (
-                      <View key={item.id} className="flex-row items-center border-b border-slate-100 dark:border-white/5 px-4 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                        
-                        {/* Date & Time */}
-                        <View className="flex-[1.5]">
-                          <Text className="text-sm font-bold text-slate-800 dark:text-white mb-0.5">{new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'})}</Text>
-                          <View className="flex-row items-center gap-1">
-                            <Clock size={12} className="text-slate-400" />
-                            <Text className="text-sm text-slate-500 dark:text-zinc-400 font-mono">{item.start_time} - {item.end_time}</Text>
+                    <ScrollView showsVerticalScrollIndicator={false} className="flex-1 w-full">
+                      {filteredShifts.map((item) => (
+                        <View key={item.id} className="flex-row items-center border-b border-slate-100 dark:border-white/5 px-4 py-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                          
+                          {/* Date & Time */}
+                          <View className="flex-[1.5]">
+                            <Text className="text-sm font-bold text-slate-800 dark:text-white mb-0.5">{new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'})}</Text>
+                            <View className="flex-row items-center gap-1">
+                              <Clock size={12} className="text-slate-400" />
+                              <Text className="text-sm text-slate-500 dark:text-zinc-400 font-mono">{item.start_time} - {item.end_time}</Text>
+                            </View>
+                          </View>
+
+                          {/* Duration */}
+                          <View className="flex-[1]">
+                            <Text className="text-sm font-bold text-slate-700 dark:text-zinc-300 font-mono">{item.duration}</Text>
+                          </View>
+
+                          {/* Role & Location */}
+                          <View className="flex-[2]">
+                            <View className="flex-row items-center gap-1.5 mb-1">
+                              <User size={14} className="text-slate-400" />
+                              <Text className="text-sm font-bold text-slate-800 dark:text-white">{item.role}</Text>
+                            </View>
+                            <View className="flex-row items-center gap-1.5">
+                              <MapPin size={12} className="text-slate-400" />
+                              <Text className="text-xs text-slate-500 dark:text-zinc-400">{item.location}</Text>
+                            </View>
+                          </View>
+
+                          {/* Status */}
+                          <View className="flex-[1]">
+                            <View className={`self-start px-2.5 py-1 rounded border ${getStatusBadgeStyles(item.status)}`}>
+                              <Text className={`text-[10px] uppercase font-bold tracking-wider text-inherit`}>{item.status}</Text>
+                            </View>
+                          </View>
+
+                          {/* Actions */}
+                          <View className="flex-[1]">
+                            <TouchableOpacity className="self-start bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/5">
+                              <Text className="text-xs font-bold text-slate-600 dark:text-zinc-300">Swap</Text>
+                            </TouchableOpacity>
                           </View>
                         </View>
-
-                        {/* Duration */}
-                        <View className="w-24">
-                          <Text className="text-sm font-bold text-slate-700 dark:text-zinc-300 font-mono">{item.duration}</Text>
-                        </View>
-
-                        {/* Role & Location */}
-                        <View className="flex-[2]">
-                          <View className="flex-row items-center gap-1.5 mb-1">
-                            <User size={14} className="text-slate-400" />
-                            <Text className="text-sm font-bold text-slate-800 dark:text-white">{item.role}</Text>
-                          </View>
-                          <View className="flex-row items-center gap-1.5">
-                            <MapPin size={12} className="text-slate-400" />
-                            <Text className="text-xs text-slate-500 dark:text-zinc-400">{item.location}</Text>
-                          </View>
-                        </View>
-
-                        {/* Status */}
-                        <View className="w-32">
-                          <View className={`self-start px-2.5 py-1 rounded border ${getStatusBadgeStyles(item.status)}`}>
-                            <Text className={`text-[10px] uppercase font-bold tracking-wider text-inherit`}>{item.status}</Text>
-                          </View>
-                        </View>
-
-                        {/* Actions */}
-                        <View className="w-32 items-center justify-center flex-row gap-2">
-                          <TouchableOpacity className="bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/5">
-                            <Text className="text-xs font-bold text-slate-600 dark:text-zinc-300">Swap</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    ))}
+                      ))}
+                    </ScrollView>
                   </View>
                 </ScrollView>
               </View>
