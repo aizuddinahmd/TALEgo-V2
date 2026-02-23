@@ -1,3 +1,3 @@
 'use client'
 
-export { HomeScreen as default } from 'app/features/home/screen'
+export { EmployeeOverview as default } from 'app/features/overview/employee-overview'

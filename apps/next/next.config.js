@@ -77,6 +77,8 @@ const nextConfig = {
     'react-native-gesture-handler',
     'nativewind',
     'react-native-css-interop',
+    'lucide-react-native',
+    'react-native-svg',
   ],
 
   compiler: {
