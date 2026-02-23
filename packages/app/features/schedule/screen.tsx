@@ -165,7 +165,7 @@ export function ScheduleScreen() {
 
               {/* Web / Desktop View: Data Table (Hidden on small screens) */}
               <View className="hidden md:flex flex-1 bg-white dark:bg-[#1A1A1A] rounded-xl border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm mt-4">
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1 w-full">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1 w-full" contentContainerClassName="min-w-full">
                   <View className="min-w-[800px] w-full flex-1">
                     {/* Table Header */}
                     <View className="flex-row items-center border-b border-slate-200 dark:border-white/5 px-4 py-3 bg-slate-50 dark:bg-[#222222]">
