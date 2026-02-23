@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   View,
   Text,
@@ -114,7 +114,7 @@ export function PayrollScreen() {
   )
 
   const WebHistoryTable = () => (
-    <View className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+    <View className="w-full bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
       <View className="flex-row items-center border-b border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50 p-4">
         <Text className="flex-2 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase w-40">
           Pay Period
@@ -147,28 +147,28 @@ export function PayrollScreen() {
             key={item.id}
             className={`flex-row items-center p-4 ${index !== PAYROLL_HISTORY.length - 1 ? 'border-b border-slate-100 dark:border-zinc-800' : ''}`}
           >
-            <View className="w-40 pr-4">
+            <View className="flex-2 w-40 pr-4">
               <Text className="text-slate-800 dark:text-slate-200 font-medium">
                 {item.month_year}
               </Text>
             </View>
-            <Text className="text-slate-700 dark:text-slate-300 text-right w-24">
+            <Text className="flex-1 text-slate-700 dark:text-slate-300 text-right w-24">
               {renderAmount(item.basic_salary)}
             </Text>
-            <Text className="text-slate-700 dark:text-slate-300 text-right w-24">
+            <Text className="flex-1 text-slate-700 dark:text-slate-300 text-right w-24">
               {renderAmount(item.ot_amount)}
             </Text>
-            <Text className="text-slate-700 dark:text-slate-300 text-right w-24">
+            <Text className="flex-1 text-slate-700 dark:text-slate-300 text-right w-24">
               {renderAmount(item.allowances)}
             </Text>
-            <Text className="text-slate-700 dark:text-slate-300 text-right w-24">
+            <Text className="flex-1 text-slate-700 dark:text-slate-300 text-right w-24">
               {renderAmount(totalDeductions)}
             </Text>
-            <Text className="text-green-600 dark:text-green-400 font-bold text-right w-32">
+            <Text className="flex-1 text-green-600 dark:text-green-400 font-bold text-right w-32">
               {renderAmount(item.net_pay)}
             </Text>
 
-            <View className="w-32 items-center">
+            <View className="flex-1 w-32 flex-row justify-center items-center">
               <TouchableOpacity className="bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 rounded-md px-3 py-1.5 flex-row items-center gap-1.5 transition-colors">
                 <Download
                   className="text-blue-600 dark:text-blue-400"
@@ -302,9 +302,14 @@ export function PayrollScreen() {
             horizontal={Platform.OS === 'web'}
             showsHorizontalScrollIndicator={false}
             className={Platform.OS === 'web' ? 'w-full' : ''}
+            contentContainerClassName={
+              Platform.OS === 'web' ? 'min-w-full' : ''
+            }
           >
             <View
-              className={Platform.OS === 'web' ? 'min-w-[800px]' : 'w-full'}
+              className={
+                Platform.OS === 'web' ? 'w-full min-w-[800px]' : 'w-full'
+              }
             >
               {Platform.OS === 'web' ? (
                 <WebHistoryTable />
