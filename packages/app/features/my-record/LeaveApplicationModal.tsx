@@ -9,8 +9,8 @@ import {
   Alert,
   ScrollView,
 } from 'react-native'
-import { X, Calendar as CalendarIcon, FileText } from 'lucide-react-native'
-import { fetchLeaveBalances, submitLeaveRequest } from '../../api/records'
+import { X, Calendar as CalendarIcon, FileText, ChevronDown } from 'lucide-react-native'
+import { fetchLeaveBalances, fetchLeaveTypes, submitLeaveRequest } from '../../api/records'
 
 interface LeaveApplicationModalProps {
   isOpen: boolean
@@ -28,7 +28,9 @@ export function LeaveApplicationModal({
   onSuccess,
 }: LeaveApplicationModalProps) {
   const [balances, setBalances] = useState<any[]>([])
+  const [allLeaveTypes, setAllLeaveTypes] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   
   // Form State
   const [selectedType, setSelectedType] = useState<string | null>(null)
@@ -39,19 +41,24 @@ export function LeaveApplicationModal({
 
   useEffect(() => {
     if (isOpen && staffId) {
-      loadBalances()
+      loadData()
     } else {
       resetForm()
     }
   }, [isOpen, staffId])
 
-  const loadBalances = async () => {
+  const loadData = async () => {
     setLoading(true)
     try {
-      const data = await fetchLeaveBalances(staffId)
-      setBalances(data)
+      const [balData, typesData] = await Promise.all([
+        fetchLeaveBalances(staffId),
+        fetchLeaveTypes()
+      ])
+      
+      setBalances(balData)
+      setAllLeaveTypes(typesData)
     } catch (err) {
-      console.error('Failed to load leave balances', err)
+      console.error('Failed to load leave data', err)
     } finally {
       setLoading(false)
     }
@@ -62,6 +69,7 @@ export function LeaveApplicationModal({
     setStartDate('')
     setEndDate('')
     setReason('')
+    setIsDropdownOpen(false)
   }
 
   // Simple date diff (assuming YYYY-MM-DD format for demo purposes)
@@ -107,6 +115,11 @@ export function LeaveApplicationModal({
     }
   }
 
+  // Find info about the currently selected type
+  const selectedTypeDetails = allLeaveTypes.find(t => t.leave_type_id === selectedType)
+  // Check if we have a balance record for this specific type
+  const matchingBalance = balances.find(b => b.leave_type?.leave_type_id === selectedType)
+
   return (
     <Modal
       visible={isOpen}
@@ -114,129 +127,185 @@ export function LeaveApplicationModal({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center p-4">
-        <View className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
+      <View className="flex-1 bg-black/70 justify-center items-center p-4">
+        <View className="bg-[#111111] border border-white/10 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-slate-200 dark:border-zinc-800">
-            <Text className="text-xl font-bold text-slate-800 dark:text-slate-50">
-              New Leave Application
-            </Text>
-            <TouchableOpacity onPress={onClose} className="p-2">
-              <X size={20} className="text-slate-500 dark:text-zinc-400" />
+          <View className="flex-row items-center justify-between p-6 border-b border-white/5">
+            <View>
+              <Text className="text-xl font-bold tracking-tight text-white mb-1">
+                New Leave Application
+              </Text>
+              <Text className="text-sm text-zinc-500">
+                Submit a new time-off request for approval
+              </Text>
+            </View>
+            <TouchableOpacity onPress={onClose} className="p-2 border border-white/5 rounded-lg bg-white/5 hover:bg-white/10">
+              <X size={20} className="text-zinc-400" />
             </TouchableOpacity>
           </View>
 
           <ScrollView className="p-6">
             {loading ? (
-              <ActivityIndicator size="large" className="my-8" />
+              <ActivityIndicator size="large" color="#fbbf24" className="my-8" />
             ) : (
-              <View className="gap-6">
-                {/* Leave Type Selection */}
-                <View>
-                  <Text className="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-3">
-                    Select Leave Type
+              <View className="gap-6 pb-4">
+                {/* Leave Type Dropdown */}
+                <View className="relative z-50">
+                  <Text className="text-sm font-bold text-zinc-300 mb-2">
+                    Select Leave Type *
                   </Text>
-                  <View className="gap-2">
-                    {balances.map((balance: any) => {
-                      const type = balance.leave_type
-                      const isSelected = selectedType === type.leave_type_id
-                      return (
-                        <TouchableOpacity
-                          key={type.leave_type_id}
-                          onPress={() => setSelectedType(type.leave_type_id)}
-                          className={`flex-row justify-between items-center p-4 border rounded-xl ${
-                            isSelected
-                              ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
-                              : 'border-slate-200 dark:border-zinc-700'
-                          }`}
-                        >
-                          <View>
-                            <Text className={`font-bold ${isSelected ? 'text-amber-700 dark:text-amber-400' : 'text-slate-800 dark:text-slate-200'}`}>
-                              {type.leave_name}
+                  
+                  <TouchableOpacity
+                    onPress={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`flex-row justify-between items-center p-4 rounded-xl border ${
+                      isDropdownOpen 
+                        ? 'border-brand-gold bg-[#1A1A1A]' 
+                        : 'border-white/10 bg-[#1A1A1A] hover:bg-white/5'
+                    } transition-colors`}
+                  >
+                    <View>
+                      {selectedTypeDetails ? (
+                         <View>
+                            <Text className="font-bold text-white text-base">
+                              {selectedTypeDetails.leave_name}
                             </Text>
-                            <Text className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
-                              Bal: {balance.remaining_days} days | Pnd: {balance.pending_days}
-                            </Text>
-                          </View>
-                          <View className={`w-5 h-5 rounded-full border items-center justify-center ${isSelected ? 'border-amber-400' : 'border-slate-300 dark:border-zinc-600'}`}>
-                            {isSelected && <View className="w-3 h-3 rounded-full bg-amber-400" />}
-                          </View>
-                        </TouchableOpacity>
-                      )
-                    })}
-                  </View>
+                            {matchingBalance ? (
+                               <Text className="text-xs text-brand-gold mt-1 font-mono">
+                                  Balance: {matchingBalance.remaining_days} days remaining
+                               </Text>
+                            ) : (
+                               <Text className="text-xs text-zinc-500 mt-1 font-mono">
+                                  No documented balance for this year
+                               </Text>
+                            )}
+                         </View>
+                      ) : (
+                        <Text className="text-zinc-500">Choose a leave type...</Text>
+                      )}
+                    </View>
+                    <ChevronDown size={20} className={isDropdownOpen ? "text-brand-gold" : "text-zinc-500"} />
+                  </TouchableOpacity>
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <View className="absolute top-[85px] left-0 right-0 bg-[#1A1A1A] border border-white/10 shadow-2xl rounded-xl overflow-hidden z-50 max-h-60 mt-2">
+                      <ScrollView nestedScrollEnabled>
+                        {allLeaveTypes.map((type) => {
+                          const isSelected = selectedType === type.leave_type_id
+                          const balInfo = balances.find(b => b.leave_type?.leave_type_id === type.leave_type_id)
+                          
+                          return (
+                            <TouchableOpacity
+                              key={type.leave_type_id}
+                              onPress={() => {
+                                setSelectedType(type.leave_type_id)
+                                setIsDropdownOpen(false)
+                              }}
+                              className={`p-4 border-b border-white/5 flex-row justify-between items-center ${
+                                isSelected ? 'bg-brand-gold/10' : 'hover:bg-white/5'
+                              }`}
+                            >
+                              <View>
+                                <Text className={`font-bold ${isSelected ? 'text-brand-gold' : 'text-zinc-200'}`}>
+                                  {type.leave_name}
+                                </Text>
+                                {balInfo && (
+                                  <Text className="text-xs text-zinc-500 mt-0.5 font-mono">
+                                    Bal: {balInfo.remaining_days} | Pnd: {balInfo.pending_days}
+                                  </Text>
+                                )}
+                              </View>
+                              <View className={`w-4 h-4 rounded-full border items-center justify-center ${isSelected ? 'border-brand-gold' : 'border-zinc-700'}`}>
+                                {isSelected && <View className="w-2 h-2 rounded-full bg-brand-gold" />}
+                              </View>
+                            </TouchableOpacity>
+                          )
+                        })}
+                      </ScrollView>
+                    </View>
+                  )}
                 </View>
 
-                {/* Dates */}
-                <View className="flex-row gap-4">
+                {/* Dates (Hidden under dropdown z-index if open, so wrapped in z-0 container) */}
+                <View className={`${isDropdownOpen ? 'opacity-30 z-0' : 'z-10'} flex-row gap-4 transition-opacity`}>
                   <View className="flex-1">
-                    <Text className="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">
-                      Start Date
+                    <Text className="text-sm font-bold text-zinc-300 mb-2">
+                      Start Date *
                     </Text>
-                    <View className="flex-row items-center border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-800/50 px-3">
-                      <CalendarIcon size={16} className="text-slate-400" />
+                    <View className="flex-row items-center border border-white/10 rounded-lg bg-[#1A1A1A] px-3 focus-within:border-brand-gold transition-colors">
+                      <CalendarIcon size={16} className="text-zinc-500" />
                       <TextInput
                         value={startDate}
                         onChangeText={setStartDate}
                         placeholder="YYYY-MM-DD"
-                        className="flex-1 py-3 px-2 text-slate-800 dark:text-slate-200"
-                        placeholderTextColor="#9ca3af"
+                        className="flex-1 py-3 px-2 text-white font-mono"
+                        placeholderTextColor="#71717a"
                       />
                     </View>
                   </View>
 
                   <View className="flex-1">
-                    <Text className="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">
-                      End Date
+                    <Text className="text-sm font-bold text-zinc-300 mb-2">
+                      End Date *
                     </Text>
-                    <View className="flex-row items-center border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-800/50 px-3">
-                      <CalendarIcon size={16} className="text-slate-400" />
+                    <View className="flex-row items-center border border-white/10 rounded-lg bg-[#1A1A1A] px-3 focus-within:border-brand-gold transition-colors">
+                      <CalendarIcon size={16} className="text-zinc-500" />
                       <TextInput
                         value={endDate}
                         onChangeText={setEndDate}
                         placeholder="YYYY-MM-DD"
-                        className="flex-1 py-3 px-2 text-slate-800 dark:text-slate-200"
-                        placeholderTextColor="#9ca3af"
+                        className="flex-1 py-3 px-2 text-white font-mono"
+                        placeholderTextColor="#71717a"
                       />
                     </View>
                   </View>
                 </View>
 
                 {/* Info Text */}
-                {startDate && endDate && (
-                  <Text className="text-sm font-medium text-slate-500 dark:text-zinc-400 text-right">
-                    Total Duration: {calculateDays(startDate, endDate)} days
-                  </Text>
+                {startDate && endDate && calculateDays(startDate, endDate) > 0 && !isDropdownOpen && (
+                  <View className="bg-brand-gold/10 border border-brand-gold/20 p-3 rounded-lg flex-row justify-between items-center">
+                    <Text className="text-sm text-brand-gold/80 flex-1">
+                      Computed duration based on inputs:
+                    </Text>
+                    <Text className="text-sm font-bold text-brand-gold font-mono">
+                      {calculateDays(startDate, endDate)} Days
+                    </Text>
+                  </View>
                 )}
 
                 {/* Reason */}
-                <View>
-                  <Text className="text-sm font-bold text-slate-700 dark:text-zinc-300 mb-2">
-                    Reason
+                <View className={isDropdownOpen ? 'opacity-30 z-0' : 'z-10'}>
+                  <Text className="text-sm font-bold text-zinc-300 mb-2">
+                    Reason / Details *
                   </Text>
                   <TextInput
                     value={reason}
                     onChangeText={setReason}
                     multiline
                     numberOfLines={4}
-                    placeholder="Provide details for this leave application..."
-                    className="border border-slate-200 dark:border-zinc-700 rounded-lg bg-slate-50 dark:bg-zinc-800/50 p-3 h-24 text-slate-800 dark:text-slate-200"
-                    placeholderTextColor="#9ca3af"
+                    placeholder="Provide details for this leave application... e.g., 'Family vacation' or 'Dentist appointment'"
+                    className="border border-white/10 rounded-lg bg-[#1A1A1A] p-3 h-24 text-white focus:border-brand-gold transition-colors"
+                    placeholderTextColor="#71717a"
                     textAlignVertical="top"
                   />
+                  {selectedTypeDetails?.requires_document && (
+                     <Text className="text-xs text-rose-400 mt-2 font-medium">
+                       * This leave type requires supporting documents (e.g. MC) which can be uploaded after submission.
+                     </Text>
+                  )}
                 </View>
               </View>
             )}
           </ScrollView>
 
           {/* Footer Actions */}
-          <View className="p-6 border-t border-slate-200 dark:border-zinc-800 flex-row justify-end gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+          <View className={`px-6 py-4 bg-[#141414] border-t border-black flex-row justify-end gap-3 ${isDropdownOpen ? 'opacity-30' : 'opacity-100'}`}>
             <TouchableOpacity
               onPress={onClose}
               disabled={isSubmitting}
-              className="px-6 py-3 rounded-lg border border-slate-200 dark:border-zinc-700 items-center justify-center"
+              className="px-6 py-3 rounded-lg border border-white/10 items-center justify-center hover:bg-white/5 active:bg-white/10 transition-colors"
             >
-              <Text className="font-bold text-slate-600 dark:text-zinc-300">
+              <Text className="font-bold text-zinc-300">
                 Cancel
               </Text>
             </TouchableOpacity>
@@ -246,16 +315,16 @@ export function LeaveApplicationModal({
               disabled={isSubmitting || !selectedType || !startDate || !endDate || !reason}
               className={`px-6 py-3 rounded-lg flex-row items-center justify-center gap-2 ${
                 isSubmitting || !selectedType || !startDate || !endDate || !reason
-                  ? 'bg-amber-300 opacity-50'
-                  : 'bg-amber-400 active:bg-amber-500 hover:bg-amber-500'
-              }`}
+                  ? 'bg-brand-gold/30'
+                  : 'bg-brand-gold shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-95 hover:bg-yellow-400'
+              } transition-all`}
             >
               {isSubmitting ? (
                 <ActivityIndicator color="#000" size="small" />
               ) : (
                 <>
-                  <FileText size={18} color="#000" />
-                  <Text className="font-bold text-black">Submit Application</Text>
+                  <FileText size={16} className={`text-black ${(!selectedType || !startDate || !endDate || !reason) ? 'opacity-50' : 'opacity-100'}`} />
+                  <Text className={`font-bold text-black ${(!selectedType || !startDate || !endDate || !reason) ? 'opacity-50' : 'opacity-100'}`}>Submit Application</Text>
                 </>
               )}
             </TouchableOpacity>

@@ -4,11 +4,15 @@ export const getStaffProfile = async () => {
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) throw new Error('Not authenticated')
 
-  const { data, error } = await supabase
-    .from('staff_profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .limit(1)
+  let query = supabase.from('staff_profiles').select('*')
+  
+  if (user.email) {
+    query = query.or(`user_id.eq.${user.id},email.eq.${user.email}`)
+  } else {
+    query = query.eq('user_id', user.id)
+  }
+
+  const { data, error } = await query.limit(1)
 
   if (error) throw error
   return data?.[0] || null
@@ -80,6 +84,16 @@ export const fetchLeaveBalances = async (staffId: string) => {
     .eq('staff_id', staffId)
     .eq('year', currentYear)
 
+  if (error) throw error
+  return data || []
+}
+
+export const fetchLeaveTypes = async () => {
+  const { data, error } = await supabase
+    .from('leave_types')
+    .select('*')
+    .eq('is_active', true)
+    
   if (error) throw error
   return data || []
 }
