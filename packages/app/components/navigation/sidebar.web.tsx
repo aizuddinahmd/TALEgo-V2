@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { 
   LayoutDashboard, 
@@ -13,17 +13,48 @@ import {
   Wallet
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-
-// Dummy user data for now
-const user = {
-  displayName: 'Judin',
-  email: 'hello@judin.com'
-}
+import { getCurrentUser, signOut } from '../../api/auth'
+import { supabase } from '../../utils/supabase'
 
 export function Sidebar() {
   const router = useRouter()
   const pathname = usePathname()
   
+  const [user, setUser] = useState<{ displayName: string; email: string } | null>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const currentUser = await getCurrentUser()
+        if (currentUser && currentUser.email) {
+          // Fetch full name from staff_profiles
+          const { data } = await supabase
+            .from('staff_profiles')
+            .select('full_name')
+            .eq('email', currentUser.email)
+            .single()
+
+          setUser({
+            displayName: data?.full_name || currentUser.email.split('@')[0],
+            email: currentUser.email,
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching user:', error)
+      }
+    }
+    fetchUser()
+  }, [])
+
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      router.push('/login')
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+  }
+
   // Extract simple path for active check
   const isActive = (path: string) => pathname === path
 
@@ -107,6 +138,7 @@ export function Sidebar() {
       </div>
 
       <div className="p-4 border-t border-black/10 dark:border-white/5">
+        {user ? (
           <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-gray-100 dark:bg-black/40 border border-black/5 dark:border-white/5 group hover:border-black/10 dark:hover:border-white/10 transition-colors cursor-pointer">
               <div className="flex items-center gap-3 overflow-hidden">
                   <div className="w-9 h-9 min-w-9 rounded-full bg-gradient-to-br from-brand-gold to-yellow-700 flex items-center justify-center text-xs font-bold text-black border border-yellow-500/30">
@@ -118,12 +150,16 @@ export function Sidebar() {
                   </div>
               </div>
               <button
+                  onClick={handleLogout}
                   className="p-2 rounded-lg text-zinc-500 hover:text-rose-500 hover:bg-black/5 dark:hover:bg-white/5 transition-all outline-none"
                   title="Disconnect"
               >
                   <LogOut size={18} strokeWidth={1.5} />
               </button>
           </div>
+        ) : (
+          <div className="h-[60px] rounded-xl bg-gray-100/50 dark:bg-black/20 animate-pulse border border-black/5 dark:border-white/5" />
+        )}
       </div>
     </motion.div>
   )

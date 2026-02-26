@@ -1,7 +1,7 @@
 import { Provider } from 'app/provider'
 import { StylesProvider } from './styles-provider'
 import '../app/globals.css'
-import { Sidebar } from 'app/components/navigation/sidebar.web'
+import { ConditionalSidebar } from './conditional-sidebar'
 
 export const metadata = {
   title: 'Create Solito App',
@@ -19,10 +19,10 @@ export default function RootLayout({
         <StylesProvider>
           <Provider>
             <div className="flex h-screen w-full text-white selection:bg-brand-gold selection:text-black overflow-hidden relative">
-              <Sidebar />
+              <ConditionalSidebar />
               {/* Main Content Area */}
               <div className="flex-1 flex flex-col relative z-10 h-full overflow-y-auto">
-                <main className="flex-1 w-full relative">
+                <main className="flex-1 flex flex-col w-full relative">
                   {children}
                 </main>
               </div>

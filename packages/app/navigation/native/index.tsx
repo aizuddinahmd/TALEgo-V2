@@ -7,7 +7,8 @@ import { Home, FileText, Zap, Inbox, User } from 'lucide-react-native'
 import { HomeScreen } from 'app/features/home/screen'
 import { UserDetailScreen } from 'app/features/user/detail-screen'
 import { PayrollScreen } from 'app/features/payroll/screen'
-import { AuthScreen } from 'app/features/auth/screen'
+import { SignInScreen } from 'app/features/auth/SignIn'
+import { SignUpScreen } from 'app/features/auth/SignUp'
 import { useTheme } from 'app/provider/theme'
 
 // Dummy screen for placeholders
@@ -31,6 +32,7 @@ const Tab = createBottomTabNavigator<{
 
 const Stack = createNativeStackNavigator<{
   login: undefined
+  'sign-up': undefined
   tabs: undefined
   'user-detail': { id: string }
   payroll: undefined
@@ -108,7 +110,8 @@ export function NativeNavigation() {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="login">
-      <Stack.Screen name="login" component={AuthScreen} />
+      <Stack.Screen name="login" component={SignInScreen} />
+      <Stack.Screen name="sign-up" component={SignUpScreen} />
       <Stack.Screen name="tabs" component={TabNavigator} />
       <Stack.Screen
         name="user-detail"

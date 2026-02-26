@@ -34,3 +34,26 @@ export const getSession = async () => {
   if (error) throw error
   return session
 }
+
+export const verifyInvitation = async (email: string, token: string) => {
+  const { data, error } = await supabase
+    .from('staff_profiles')
+    .select('staff_id, ic_number')
+    .eq('email', email)
+    .single()
+
+  if (error || !data) {
+    return false
+  }
+
+  return data.ic_number === token
+}
+
+export const signUpWithEmail = async (email: string, password?: string) => {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password: password || '',
+  })
+  if (error) throw error
+  return data
+}

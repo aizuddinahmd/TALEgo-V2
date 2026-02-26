@@ -1,3 +1,3 @@
 'use client'
 
-export { AuthScreen as default } from 'app/features/auth/screen'
+export { SignInScreen as default } from 'app/features/auth/SignIn'
