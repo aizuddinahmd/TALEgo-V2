@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -17,10 +17,58 @@ import {
   FileText,
   MoreHorizontal,
 } from 'lucide-react-native'
+import { getStaffProfile, fetchLeaveRecords, fetchExpenseRecords, fetchAttendanceRecords } from '../../api/records'
+import { LeaveApplicationModal } from './LeaveApplicationModal'
 
 export function MyRecordScreen() {
   const [activeTab, setActiveTab] = useState('expenses') // Default to expenses to match screenshot
   const [filter, setFilter] = useState('All')
+  const [staffId, setStaffId] = useState<string | null>(null)
+  const [orgId, setOrgId] = useState<string | null>(null)
+  const [records, setRecords] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    const initStaff = async () => {
+      try {
+        const profile = await getStaffProfile()
+        if (profile) {
+          setStaffId(profile.staff_id)
+          setOrgId(profile.org_id)
+        }
+      } catch (err) {
+        console.error('Failed to get staff profile', err)
+      }
+    }
+    initStaff()
+  }, [])
+
+  const loadData = async () => {
+    if (!staffId && activeTab !== 'attendance') return
+    setIsLoading(true)
+    try {
+      let rawData: any[] = []
+      if (activeTab === 'leave') {
+        rawData = await fetchLeaveRecords(staffId!)
+      } else if (activeTab === 'expenses') {
+        rawData = await fetchExpenseRecords(staffId!)
+      } else if (activeTab === 'attendance') {
+        rawData = await fetchAttendanceRecords()
+      }
+      setRecords(rawData)
+    } catch (err) {
+      console.error('Failed to fetch records', err)
+      setRecords([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    setRecords([]) // Clear old records immediately to prevent UI mapping crashes
+    loadData()
+  }, [activeTab, staffId])
 
   // Mapped tabs for easy configuration
   const tabs = [
@@ -32,53 +80,86 @@ export function MyRecordScreen() {
     { id: 'payment', label: 'Payment', icon: AlertCircle },
   ]
 
-  const MOCK_DATA = {
-    expenses: [
-      {
-        id: '1',
-        date: '05 Feb 2026',
-        refNo: 'EXP-2026-00001',
-        vendorTitle: 'testing',
-        vendorSubtitle: 'Bill',
-        status: 'PAID',
-        statusColor: 'border-green-500/50 text-green-400',
-        progressMain: 'RM 100.00',
-        progressMainColor: 'text-green-400',
-        progressSub: 'Bal: RM 0.00',
-        docs: false,
-      },
-      {
-        id: '2',
-        date: '04 Feb 2026',
-        refNo: 'EXP-2026-00002',
-        vendorTitle: 'Muhammad Hasnuddin',
-        vendorSubtitle: 'Bill',
-        status: 'PARTIAL',
-        statusColor: 'border-blue-500/50 text-blue-400',
-        progressMain: 'RM 2,000.00',
-        progressMainColor: 'text-green-400',
-        progressSub: 'Bal: RM 1,690.00',
-        docs: true,
-      },
-    ],
-    leave: [
-      {
-        id: '3',
-        date: '01 Feb 2026',
-        refNo: 'LV-2026-00001',
-        vendorTitle: 'Annual Leave',
-        vendorSubtitle: '2 Days',
-        status: 'APPROVED',
-        statusColor: 'border-green-500/50 text-green-400',
-        progressMain: '100%',
+  // Map fetched data to our UI format
+  const getMappedData = () => {
+    return records.map((record: any) => {
+      if (activeTab === 'leave') {
+        const typeName = record.leave_type?.leave_name || 'Leave'
+        const statusText = record.status?.toUpperCase() || 'UNKNOWN'
+        const reqId = record.request_id || 'UNKNOWN'
+        return {
+          id: reqId,
+          date: new Date(record.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+          refNo: `LV-${reqId.slice(0,8).toUpperCase()}`,
+          vendorTitle: typeName,
+          vendorSubtitle: `${record.total_days} Days`,
+          status: statusText,
+          statusColor: record.status === 'approved' ? 'border-green-500/50 text-green-400' :
+                       record.status === 'rejected' ? 'border-red-500/50 text-red-400' : 'border-blue-500/50 text-blue-400',
+          progressMain: '',
+          progressMainColor: 'text-slate-200',
+          progressSub: `${new Date(record.start_date).toLocaleDateString()} - ${new Date(record.end_date).toLocaleDateString()}`,
+          docs: false,
+        }
+      } else if (activeTab === 'expenses') {
+        const catName = record.category?.category_name || 'Expense'
+        const statusText = record.status?.toUpperCase() || 'UNKNOWN'
+        const claimId = record.claim_id || 'UNKNOWN'
+        return {
+          id: claimId,
+          date: new Date(record.claim_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+          refNo: `EXP-${claimId.slice(0,8).toUpperCase()}`,
+          vendorTitle: record.description,
+          vendorSubtitle: catName,
+          status: statusText,
+          statusColor: record.status === 'approved' ? 'border-green-500/50 text-green-400' :
+                       record.status === 'rejected' ? 'border-red-500/50 text-red-400' :
+                       record.status === 'paid' ? 'border-purple-500/50 text-purple-400' : 'border-blue-500/50 text-blue-400',
+          progressMain: `RM ${Number(record.amount || 0).toFixed(2)}`,
+          progressMainColor: 'text-green-400',
+          progressSub: '',
+          docs: false,
+        }
+      } else if (activeTab === 'attendance') {
+        const statusText = record.status?.toUpperCase() || 'PRESENT'
+        const logId = record.log_id || record.id || 'UNKNOWN'
+        return {
+          id: logId,
+          date: record.checkin_time ? new Date(record.checkin_time).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown',
+          refNo: `ATT-${logId.slice(0,8).toUpperCase()}`,
+          vendorTitle: statusText,
+          vendorSubtitle: `Clock In: ${record.checkin_time ? new Date(record.checkin_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-'}`,
+          status: statusText,
+          statusColor: record.status === 'present' ? 'border-green-500/50 text-green-400' :
+                       record.status === 'late' ? 'border-orange-500/50 text-orange-400' : 'border-red-500/50 text-red-400',
+          progressMain: record.checkout_time ? `Out: ${new Date(record.checkout_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` : 'Not checked out',
+          progressMainColor: 'text-slate-200',
+          progressSub: record.working_hours ? `${Number(record.working_hours).toFixed(2)} Hrs` : '',
+          docs: false,
+        }
+      }
+      // Return a safe empty object (or fallback mapping) for unhandled tabs
+      return {
+        id: record?.id || Math.random().toString(),
+        date: '---',
+        refNo: '---',
+        vendorTitle: 'Not Implemented',
+        vendorSubtitle: '',
+        status: 'UNKNOWN',
+        statusColor: 'border-slate-500/50 text-slate-400',
+        progressMain: '',
         progressMainColor: 'text-slate-200',
-        progressSub: 'Completed',
+        progressSub: '',
         docs: false,
-      },
-    ],
+      }
+    })
   }
 
-  const currentData = MOCK_DATA[activeTab as keyof typeof MOCK_DATA] || []
+  let currentData = getMappedData()
+  if (filter !== 'All') {
+    currentData = currentData.filter(item => item.status === filter.toUpperCase())
+  }
+
   const activeTabLabel = tabs.find((t) => t.id === activeTab)?.label || 'Entry'
 
   return (
@@ -96,7 +177,18 @@ export function MyRecordScreen() {
           </View>
 
           {/* Dynamic Action Button */}
-          <TouchableOpacity className="bg-amber-400 hover:bg-amber-500 rounded-lg px-6 py-3 flex-row items-center gap-2 active:opacity-80">
+          <TouchableOpacity
+            onPress={() => {
+              if (activeTab === 'leave') {
+                if (!staffId) {
+                  alert("You must have a registered staff profile to apply for leave.")
+                } else {
+                  setIsModalOpen(true)
+                }
+              }
+            }}
+            className="bg-amber-400 hover:bg-amber-500 rounded-lg px-6 py-3 flex-row items-center gap-2 active:opacity-80"
+          >
             <Text className="text-black font-bold text-sm">
               + New {activeTabLabel} Entry
             </Text>
@@ -252,7 +344,13 @@ export function MyRecordScreen() {
                 showsVerticalScrollIndicator={false}
                 className="flex-1"
               >
-                {currentData.length > 0 ? (
+                {isLoading ? (
+                  <View className="py-12 items-center justify-center">
+                    <Text className="text-slate-500 dark:text-zinc-500">
+                      Loading records...
+                    </Text>
+                  </View>
+                ) : currentData.length > 0 ? (
                   currentData.map((item) => (
                     <View
                       key={item.id}
@@ -290,12 +388,12 @@ export function MyRecordScreen() {
                       {/* Status Box */}
                       <View className="flex-[1.5]">
                         <View
-                          className={`self-start border ${item.statusColor} px-2 py-0.5 rounded`}
+                          className={`self-start border ${item.statusColor || 'border-blue-500/50 text-blue-400'} px-2 py-0.5 rounded`}
                         >
                           <Text
-                            className={`text-[10px] font-bold tracking-wider ${item.statusColor.split(' ').find((c) => c.startsWith('text-')) || ''}`}
+                            className={`text-[10px] font-bold tracking-wider ${(item.statusColor || 'text-blue-400').split(' ').find((c: string) => c.startsWith('text-')) || ''}`}
                           >
-                            {item.status}
+                            {item.status || 'UNKNOWN'}
                           </Text>
                         </View>
                       </View>
@@ -303,12 +401,12 @@ export function MyRecordScreen() {
                       {/* Progress */}
                       <View className="flex-[1.5]">
                         <Text
-                          className={`text-sm font-bold font-mono ${item.progressMainColor}`}
+                          className={`text-sm font-bold font-mono ${item.progressMainColor || 'text-slate-200'}`}
                         >
-                          {item.progressMain}
+                          {item.progressMain || ''}
                         </Text>
                         <Text className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono mt-0.5">
-                          {item.progressSub}
+                          {item.progressSub || ''}
                         </Text>
                       </View>
 
@@ -370,6 +468,19 @@ export function MyRecordScreen() {
           </ScrollView>
         </View>
       </View>
+      
+      {/* Leave Modal */}
+      {staffId && orgId && (
+        <LeaveApplicationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          staffId={staffId}
+          orgId={orgId}
+          onSuccess={() => {
+            loadData()
+          }}
+        />
+      )}
     </SafeAreaView>
   )
 }
