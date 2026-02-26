@@ -104,7 +104,7 @@ export function Sidebar() {
   const navItems = [
     { id: 'overview', name: 'Overview', icon: LayoutDashboard, path: '/' },
     { id: 'my-record', name: 'My Record', icon: FileText, path: '/record' },
-    { id: 'apply', name: 'Apply', icon: Send, path: '/apply' },
+    // { id: 'apply', name: 'Apply', icon: Send, path: '/apply' },
     { id: 'schedule', name: 'Schedule', icon: Calendar, path: '/schedule' },
     { id: 'payroll', name: 'Payroll & Wallet', icon: Wallet, path: '/payroll' },
   ]
