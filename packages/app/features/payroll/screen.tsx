@@ -8,6 +8,7 @@ import {
   Platform,
 } from 'react-native'
 import { Eye, EyeOff, FileText, Download, Calendar } from 'lucide-react-native'
+import { PayBreakdownCard } from '../../ui/pay-breakdown-card'
 
 const PAYROLL_HISTORY = [
   {
@@ -75,48 +76,32 @@ export function PayrollScreen() {
 
   const MobileHistoryList = () => (
     <View className="flex-col gap-4">
-      {PAYROLL_HISTORY.map((item) => (
-        <View
-          key={item.id}
-          className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 p-5 shadow-sm"
-        >
-          <View className="flex-row justify-between items-center mb-4">
-            <View>
-              <Text className="text-slate-800 dark:text-slate-50 font-bold text-lg">
-                {item.month_year}
-              </Text>
-              <Text className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-                {item.period_start} - {item.period_end}
-              </Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-slate-500 dark:text-slate-400 text-xs mb-1">
-                Net Pay
-              </Text>
-              <Text className="text-green-600 dark:text-green-400 font-bold text-lg">
-                {renderAmount(item.net_pay)}
-              </Text>
-            </View>
-          </View>
-
-          <TouchableOpacity className="bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg py-3 flex-row items-center justify-center gap-2">
-            <FileText
-              className="text-slate-600 dark:text-slate-300"
-              size={18}
-            />
-            <Text className="text-slate-600 dark:text-slate-300 font-medium text-sm">
-              View Details
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ))}
+      {PAYROLL_HISTORY.map((item) => {
+        const totalGross = item.basic_salary + item.ot_amount + item.allowances;
+        const totalDeductions = item.epf + item.socso + item.eis + item.pcb;
+        
+        return (
+          <PayBreakdownCard
+            key={item.id}
+            period={item.month_year}
+            netPay={item.net_pay}
+            grossPay={totalGross}
+            deductions={totalDeductions}
+            onDownload={() => console.log('Download', item.id)}
+            onViewDetails={() => console.log('View details', item.id)}
+          />
+        );
+      })}
     </View>
   )
 
   const WebHistoryTable = () => (
     <View className="w-full bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
       <View className="flex-row items-center border-b border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50 p-4">
-        <Text className="flex-2 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase w-40">
+        <Text
+          style={{ flex: 2 }}
+          className="text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase w-40"
+        >
           Pay Period
         </Text>
         <Text className="flex-1 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase text-right w-24">
@@ -147,7 +132,7 @@ export function PayrollScreen() {
             key={item.id}
             className={`flex-row items-center p-4 ${index !== PAYROLL_HISTORY.length - 1 ? 'border-b border-slate-100 dark:border-zinc-800' : ''}`}
           >
-            <View className="flex-2 w-40 pr-4">
+            <View style={{ flex: 2 }} className="w-40 pr-4">
               <Text className="text-slate-800 dark:text-slate-200 font-medium">
                 {item.month_year}
               </Text>

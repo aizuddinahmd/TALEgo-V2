@@ -46,7 +46,7 @@ export function EmployeeOverview() {
       <ScrollView className="flex-1" contentContainerClassName="p-4 md:p-6 lg:p-8">
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-slate-500 dark:text-slate-400 font-medium text-lg mb-1">TALEpulse Dashboard</Text>
+          <Text className="text-slate-500 dark:text-slate-400 font-medium text-lg mb-1">TALEgo Dashboard</Text>
           <Text className="text-2xl font-bold text-slate-800 dark:text-slate-50">Employee Overview</Text>
         </View>
 

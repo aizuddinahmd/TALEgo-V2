@@ -1,0 +1,41 @@
+diff --git a/node_modules/react-native-css-interop/.cache/android.js b/node_modules/react-native-css-interop/.cache/android.js
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-css-interop/.cache/ios.js b/node_modules/react-native-css-interop/.cache/ios.js
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-css-interop/.cache/macos.js b/node_modules/react-native-css-interop/.cache/macos.js
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-css-interop/.cache/native.js b/node_modules/react-native-css-interop/.cache/native.js
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-css-interop/.cache/windows.js b/node_modules/react-native-css-interop/.cache/windows.js
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-css-interop/dist/css-to-rn/parseDeclaration.js b/node_modules/react-native-css-interop/dist/css-to-rn/parseDeclaration.js
+index 59ea66e..c958557 100644
+--- a/node_modules/react-native-css-interop/dist/css-to-rn/parseDeclaration.js
++++ b/node_modules/react-native-css-interop/dist/css-to-rn/parseDeclaration.js
+@@ -917,7 +917,7 @@ function parseDeclaration(declaration, options) {
+         case "text-align":
+             return addStyleProp(declaration.property, parseTextAlign(declaration.value, parseOptions));
+         case "box-shadow": {
+-            parseBoxShadow(declaration.value, parseOptions);
++            parseBoxShadow(declaration.value, parseOptions); break;
+         }
+         case "aspect-ratio": {
+             return addStyleProp(declaration.property, parseAspectRatio(declaration.value));
+diff --git a/node_modules/react-native-css-interop/src/css-to-rn/parseDeclaration.ts b/node_modules/react-native-css-interop/src/css-to-rn/parseDeclaration.ts
+index bf095a5..5d9c6d8 100644
+--- a/node_modules/react-native-css-interop/src/css-to-rn/parseDeclaration.ts
++++ b/node_modules/react-native-css-interop/src/css-to-rn/parseDeclaration.ts
+@@ -1555,7 +1555,7 @@ export function parseDeclaration(
+         parseTextAlign(declaration.value, parseOptions),
+       );
+     case "box-shadow": {
+-      parseBoxShadow(declaration.value, parseOptions);
++      parseBoxShadow(declaration.value, parseOptions); break;
+     }
+     case "aspect-ratio": {
+       return addStyleProp(

@@ -3,11 +3,15 @@
   "name": "app",
   "main": "index.ts",
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^3.0.1",
     "@react-navigation/native": "^7.0.15",
     "@react-navigation/native-stack": "^7.2.1",
+    "@supabase/supabase-js": "^2.97.0",
+    "clsx": "^2.1.1",
     "dripsy": "^4.3.3",
     "moti": "^0.30.0",
-    "solito": "next"
+    "solito": "next",
+    "tailwind-merge": "^3.5.0"
   },
   "sideEffects": false
 }

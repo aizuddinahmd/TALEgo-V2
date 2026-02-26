@@ -1,0 +1,175 @@
+-- Helper function to bulk assign permissions
+CREATE OR REPLACE FUNCTION assign_permissions_to_role(
+  p_role_code TEXT,
+  p_permission_codes TEXT[]
+)
+RETURNS VOID AS $$
+DECLARE
+  v_permission_code TEXT;
+  v_permission_id UUID;
+BEGIN
+  FOREACH v_permission_code IN ARRAY p_permission_codes
+  LOOP
+    SELECT permission_id INTO v_permission_id
+    FROM permissions
+    WHERE permission_code = v_permission_code;
+
+    IF v_permission_id IS NOT NULL THEN
+      INSERT INTO role_permissions (role_code, permission_id, is_default)
+      VALUES (p_role_code, v_permission_id, TRUE)
+      ON CONFLICT DO NOTHING;
+    END IF;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ====================
+-- OWNER (Full Access)
+-- ====================
+SELECT assign_permissions_to_role('OWNER', ARRAY[
+  -- System (all)
+  'SYS_ORG_VIEW', 'SYS_ORG_EDIT', 'SYS_ORG_ADMIN',
+  'SYS_USER_VIEW', 'SYS_USER_INVITE', 'SYS_USER_EDIT', 'SYS_USER_ADMIN',
+  'SYS_PERMISSION_VIEW', 'SYS_PERMISSION_EDIT',
+  'SYS_SUBSCRIPTION_VIEW', 'SYS_SUBSCRIPTION_ADMIN',
+
+  -- HR (all)
+  'HR_PROFILE_VIEW', 'HR_PROFILE_CREATE', 'HR_PROFILE_EDIT',
+  'HR_LEAVE_VIEW', 'HR_LEAVE_APPROVE',
+  'HR_CALENDAR_VIEW',
+  'HR_CLAIM_VIEW', 'HR_CLAIM_APPROVE',
+  'HR_ANNOUNCEMENT_VIEW', 'HR_ANNOUNCEMENT_CREATE', 'HR_ANNOUNCEMENT_EDIT',
+
+  -- Payroll (all)
+  'PAYROLL_CONFIG_VIEW', 'PAYROLL_CONFIG_APPROVE',
+  'PAYROLL_RUN_VIEW', 'PAYROLL_RUN_APPROVE',
+  'PAYROLL_PAYSLIP_VIEW_ALL',
+  'PAYROLL_EA_VIEW_ALL', 'PAYROLL_EA_EXPORT',
+  'PAYROLL_BANK_EXPORT_VIEW', 'PAYROLL_BANK_EXPORT_APPROVE', 'PAYROLL_BANK_EXPORT_DOWNLOAD',
+  'PAYROLL_DISBURSE_VIEW', 'PAYROLL_DISBURSE_APPROVE',
+  'PAYROLL_EPF_VIEW', 'PAYROLL_EPF_APPROVE', 'PAYROLL_EPF_EXPORT',
+  'PAYROLL_SOCSO_VIEW', 'PAYROLL_SOCSO_APPROVE', 'PAYROLL_SOCSO_EXPORT',
+  'PAYROLL_EIS_VIEW', 'PAYROLL_EIS_APPROVE', 'PAYROLL_EIS_EXPORT',
+  'PAYROLL_STATUTORY_VIEW',
+
+  -- AI Docs (all)
+  'AI_OFFER_VIEW', 'AI_OFFER_CREATE', 'AI_OFFER_APPROVE',
+  'AI_CONTRACT_VIEW', 'AI_CONTRACT_CREATE',
+  'AI_TEMPLATE_VIEW', 'AI_TEMPLATE_EDIT', 'AI_TEMPLATE_ADMIN',
+  'AI_VERSION_VIEW',
+
+  -- Audit (all)
+  'AUDIT_LOG_VIEW',
+  'WORKFLOW_RULES_VIEW', 'WORKFLOW_RULES_ADMIN',
+  'AUDIT_MODE_VIEW', 'AUDIT_MODE_ADMIN'
+]);
+
+-- ====================
+-- ADMIN/CLERK
+-- ====================
+SELECT assign_permissions_to_role('ADMIN', ARRAY[
+  -- System (limited)
+  'SYS_ORG_VIEW',
+  'SYS_USER_VIEW', 'SYS_USER_INVITE', 'SYS_USER_EDIT',
+
+  -- HR (create/edit)
+  'HR_PROFILE_VIEW', 'HR_PROFILE_CREATE', 'HR_PROFILE_EDIT',
+  'HR_CALENDAR_VIEW',
+  'HR_ANNOUNCEMENT_VIEW', 'HR_ANNOUNCEMENT_CREATE', 'HR_ANNOUNCEMENT_EDIT'
+]);
+
+-- ====================
+-- ACCOUNTANT
+-- ====================
+SELECT assign_permissions_to_role('ACCOUNTANT', ARRAY[
+  -- System (view only)
+  'SYS_ORG_VIEW',
+
+  -- HR (summary view)
+  'HR_PROFILE_VIEW',
+
+  -- Payroll (review only)
+  'PAYROLL_CONFIG_VIEW',
+  'PAYROLL_RUN_VIEW',
+  'PAYROLL_EA_VIEW_ALL', 'PAYROLL_EA_EXPORT',
+  'PAYROLL_BANK_EXPORT_VIEW',
+  'PAYROLL_DISBURSE_VIEW',
+  'PAYROLL_EPF_VIEW',
+  'PAYROLL_SOCSO_VIEW',
+  'PAYROLL_EIS_VIEW',
+  'PAYROLL_STATUTORY_VIEW',
+
+  -- AI Docs (review)
+  'AI_OFFER_VIEW',
+  'AI_CONTRACT_VIEW',
+  'AI_TEMPLATE_VIEW',
+
+  -- Audit (view)
+  'AUDIT_LOG_VIEW'
+]);
+
+-- ====================
+-- HR
+-- ====================
+SELECT assign_permissions_to_role('HR', ARRAY[
+  -- System (view)
+  'SYS_ORG_VIEW',
+
+  -- HR (full control)
+  'HR_PROFILE_VIEW', 'HR_PROFILE_CREATE', 'HR_PROFILE_EDIT', 'HR_PROFILE_APPROVE',
+  'HR_LEAVE_VIEW', 'HR_LEAVE_APPROVE',
+  'HR_CALENDAR_VIEW',
+  'HR_CLAIM_VIEW', 'HR_CLAIM_APPROVE',
+  'HR_ANNOUNCEMENT_VIEW', 'HR_ANNOUNCEMENT_CREATE', 'HR_ANNOUNCEMENT_EDIT',
+
+  -- Payroll (full control)
+  'PAYROLL_CONFIG_VIEW', 'PAYROLL_CONFIG_EDIT', 'PAYROLL_CONFIG_APPROVE',
+  'PAYROLL_RUN_VIEW', 'PAYROLL_RUN_CREATE', 'PAYROLL_RUN_APPROVE',
+  'PAYROLL_PAYSLIP_VIEW_ALL',
+  'PAYROLL_EA_VIEW_ALL', 'PAYROLL_EA_CREATE', 'PAYROLL_EA_EXPORT',
+  'PAYROLL_BANK_EXPORT_VIEW', 'PAYROLL_BANK_EXPORT_CREATE', 'PAYROLL_BANK_EXPORT_APPROVE', 'PAYROLL_BANK_EXPORT_DOWNLOAD',
+  'PAYROLL_DISBURSE_VIEW', 'PAYROLL_DISBURSE_CREATE',
+  'PAYROLL_EPF_VIEW', 'PAYROLL_EPF_CREATE', 'PAYROLL_EPF_APPROVE', 'PAYROLL_EPF_EXPORT',
+  'PAYROLL_SOCSO_VIEW', 'PAYROLL_SOCSO_CREATE', 'PAYROLL_SOCSO_APPROVE', 'PAYROLL_SOCSO_EXPORT',
+  'PAYROLL_EIS_VIEW', 'PAYROLL_EIS_CREATE', 'PAYROLL_EIS_APPROVE', 'PAYROLL_EIS_EXPORT',
+  'PAYROLL_STATUTORY_VIEW',
+
+  -- AI Docs (HR docs)
+  'AI_OFFER_VIEW', 'AI_OFFER_CREATE', 'AI_OFFER_APPROVE',
+  'AI_CONTRACT_VIEW', 'AI_CONTRACT_CREATE',
+  'AI_TEMPLATE_VIEW', 'AI_TEMPLATE_EDIT',
+  'AI_VERSION_VIEW', 'AI_VERSION_CREATE',
+
+  -- Audit (limited)
+  'AUDIT_LOG_VIEW_LIMITED',
+  'WORKFLOW_RULES_VIEW'
+]);
+
+-- ====================
+-- COSEC (Company Secretary)
+-- ====================
+SELECT assign_permissions_to_role('COSEC', ARRAY[
+  -- System (view)
+  'SYS_ORG_VIEW',
+
+  -- Audit (equity only)
+  'AUDIT_LOG_VIEW_LIMITED'
+
+  -- Note: Cosec mainly works with equity/director modules (already built)
+  -- No HR permissions needed
+]);
+
+-- ====================
+-- FINANCE/KERANI
+-- ====================
+SELECT assign_permissions_to_role('FINANCE', ARRAY[
+  -- System (view)
+  'SYS_ORG_VIEW',
+
+  -- HR (limited)
+  'HR_PROFILE_VIEW',
+
+  -- Payroll (view only)
+  'PAYROLL_CONFIG_VIEW',
+  'PAYROLL_STATUTORY_VIEW'
+]);

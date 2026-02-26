@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { View } from 'react-native';
 
 type ThemeMode = 'classic' | 'neo';
 type ColorMode = 'light' | 'dark';
@@ -55,9 +56,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     return (
         <ThemeContext.Provider value={{ themeMode, toggleTheme, colorMode, toggleColorMode }}>
-            <div className={`${themeMode === 'neo' ? 'theme-neo' : 'theme-classic'} ${colorMode === 'light' ? 'light-mode' : 'dark-mode dark'} min-h-screen w-full transition-colors duration-300`}>
+            <View className={`${themeMode === 'neo' ? 'theme-neo' : 'theme-classic'} ${colorMode === 'light' ? 'light-mode' : 'dark-mode dark'} flex-1 w-full transition-colors duration-300`}>
                 {children}
-            </div>
+            </View>
         </ThemeContext.Provider>
     );
 };
