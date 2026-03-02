@@ -42,43 +42,43 @@ export function EmployeeOverview() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-zinc-950">
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-brand-black">
       <ScrollView className="flex-1" contentContainerClassName="p-4 md:p-6 lg:p-8">
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-slate-500 dark:text-slate-400 font-medium text-lg mb-1">TALEgo Dashboard</Text>
+          <Text className="text-slate-500 dark:text-brand-gold font-medium text-lg mb-1">TALEgo Dashboard</Text>
           <Text className="text-2xl font-bold text-slate-800 dark:text-slate-50">Employee Overview</Text>
         </View>
 
         {/* Top Section */}
         <View className="flex-col lg:flex-row gap-4 mb-8">
           {/* Clock Card */}
-          <View className="flex-1 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm p-6">
+          <View className="flex-1 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
             <View className="flex-row items-center justify-between mb-6">
               <View>
                 <Text className="text-slate-500 dark:text-slate-400 font-medium">{currentDate}</Text>
                 <Text className="text-4xl font-bold text-slate-800 dark:text-slate-50 mt-1">{currentTime}</Text>
               </View>
-              <View className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center">
-                <Clock className="text-blue-600 dark:text-blue-400" size={24} />
+              <View className="w-12 h-12 bg-blue-100 dark:bg-brand-gold/20 rounded-full items-center justify-center">
+                <Clock className="text-blue-600 dark:text-brand-gold" size={24} />
               </View>
             </View>
             
             <View className="flex-row items-center gap-4">
-              <TouchableOpacity className="flex-1 bg-blue-600 dark:bg-blue-500 rounded-lg py-4 flex-row items-center justify-center gap-2 active:bg-blue-700 dark:active:bg-blue-600">
+              <TouchableOpacity className="flex-1 bg-blue-600 dark:bg-brand-gold rounded-lg py-4 flex-row items-center justify-center gap-2 active:bg-blue-700 dark:active:bg-brand-gold/80">
                 <MapPin color="white" size={20} />
                 <Text className="text-white font-bold text-base">Clock In</Text>
               </TouchableOpacity>
-              <View className="w-14 h-14 bg-slate-100 dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700 items-center justify-center">
+              <View className="w-14 h-14 bg-slate-100 dark:bg-zinc-800/50 rounded-lg border border-slate-200 dark:border-zinc-700/50 items-center justify-center">
                 <MapPin className="text-slate-400 dark:text-slate-500" size={20} />
               </View>
             </View>
           </View>
 
           {/* Notifications Card */}
-          <View className="flex-1 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm p-6">
+          <View className="flex-1 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold text-slate-800 dark:text-slate-50">Notifications</Text>
+              <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold">Notifications</Text>
               <TouchableOpacity>
                 <Text className="text-blue-600 dark:text-blue-400 font-medium">View All</Text>
               </TouchableOpacity>
@@ -91,7 +91,7 @@ export function EmployeeOverview() {
                     <View className="mt-0.5">
                       <IconComponent className={item.color} size={20} />
                     </View>
-                    <View className="flex-1 border-b border-slate-50 dark:border-zinc-800 pb-3">
+                    <View className="flex-1 border-b border-slate-50 dark:border-zinc-800/50 pb-3">
                       <Text className="text-slate-800 dark:text-slate-200 font-medium">{item.title}</Text>
                       <Text className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{item.time}</Text>
                     </View>
@@ -104,7 +104,7 @@ export function EmployeeOverview() {
 
         {/* Statistics Grid */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-slate-800 dark:text-slate-50 mb-4">Statistics</Text>
+          <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold mb-4">Statistics</Text>
           {/* Mobile view: Horizontal ScrollView */}
           <ScrollView 
             horizontal 
@@ -115,7 +115,7 @@ export function EmployeeOverview() {
             {STATISTICS.map((stat) => {
               const IconComponent = stat.icon;
               return (
-                <View key={stat.id} className="w-36 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm p-4">
+                <View key={stat.id} className="w-36 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-4">
                   <View className={`w-10 h-10 ${stat.bg} rounded-full items-center justify-center mb-3`}>
                     <IconComponent className={stat.color} size={20} />
                   </View>
@@ -131,7 +131,7 @@ export function EmployeeOverview() {
             {STATISTICS.map((stat) => {
               const IconComponent = stat.icon;
               return (
-                <View key={stat.id} className="w-[30%] lg:w-[15%] flex-grow bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm p-4">
+                <View key={stat.id} className="w-[30%] lg:w-[15%] flex-grow bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-4">
                   <View className={`w-10 h-10 ${stat.bg} rounded-full items-center justify-center mb-3`}>
                      <IconComponent className={stat.color} size={20} />
                   </View>
@@ -147,8 +147,8 @@ export function EmployeeOverview() {
         <View className="flex-col lg:flex-row gap-6 mb-8">
           {/* Pending Applications */}
           <View className="flex-1">
-            <Text className="text-lg font-bold text-slate-800 dark:text-slate-50 mb-4">Pending Applications</Text>
-            <View className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm px-4 pt-4 pb-1">
+            <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold mb-4">Pending Applications</Text>
+            <View className="bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm px-4 pt-4 pb-1">
               {PENDING_APPLICATIONS.map((app, index) => (
                 <View key={app.id} className={`flex-row justify-between items-center pb-3 mb-3 ${index !== PENDING_APPLICATIONS.length - 1 ? 'border-b border-slate-100 dark:border-zinc-800' : ''}`}>
                   <View>
@@ -166,14 +166,14 @@ export function EmployeeOverview() {
           {/* Shift Schedule */}
           <View className="flex-1 lg:flex-[2]">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold text-slate-800 dark:text-slate-50">Shift Schedule</Text>
+              <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold">Shift Schedule</Text>
               <TouchableOpacity>
                 <Text className="text-blue-600 dark:text-blue-400 font-medium">View Calendar</Text>
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3 pr-8 lg:pr-0">
               {SHIFT_SCHEDULE.map((shift, index) => (
-                <View key={index} className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm p-5 min-w-[130px]">
+                <View key={index} className="bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-5 min-w-[130px]">
                   <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">{shift.day}</Text>
                   <Text className="text-slate-800 dark:text-slate-50 font-bold mt-1 text-lg">{shift.time}</Text>
                 </View>
