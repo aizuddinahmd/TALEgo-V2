@@ -120,3 +120,94 @@ export const submitLeaveRequest = async (payload: {
   if (error) throw error
   return data
 }
+
+// ------------------------------------------------------------------
+// Expenses / Claims API
+// ------------------------------------------------------------------
+
+export const fetchClaimCategories = async () => {
+  const { data, error } = await supabase
+    .from('claim_categories')
+    .select('*')
+    .eq('is_active', true)
+    
+  if (error) throw error
+  return data || []
+}
+
+export const submitExpenseClaim = async (payload: {
+  org_id: string
+  staff_id: string
+  category_id: string
+  claim_date: string
+  description: string
+  amount: number
+}) => {
+  const { data, error } = await supabase
+    .from('claims')
+    .insert([
+      {
+        org_id: payload.org_id,
+        staff_id: payload.staff_id,
+        category_id: payload.category_id,
+        claim_date: payload.claim_date,
+        description: payload.description,
+        amount: payload.amount,
+        status: 'pending'
+      }
+    ])
+    .select()
+
+  if (error) throw error
+  return data
+}
+
+// ------------------------------------------------------------------
+// Attendance Corrections API
+// ------------------------------------------------------------------
+
+export const submitAttendanceCorrection = async (payload: {
+  org_id: string
+  staff_id: string
+  original_checkin?: string
+  original_checkout?: string
+  proposed_checkin: string
+  proposed_checkout: string
+  reason: string
+}) => {
+  const { data, error } = await supabase
+    .from('attendance_corrections')
+    .insert([
+      {
+        org_id: payload.org_id,
+        staff_id: payload.staff_id,
+        original_checkin: payload.original_checkin || null,
+        original_checkout: payload.original_checkout || null,
+        proposed_checkin: payload.proposed_checkin,
+        proposed_checkout: payload.proposed_checkout,
+        reason: payload.reason,
+        status: 'pending',
+        requested_at: new Date().toISOString()
+      }
+    ])
+    .select()
+
+  if (error) throw error
+  return data
+}
+
+// ------------------------------------------------------------------
+// Time Off / Overtime / Payment API Stubs
+// ------------------------------------------------------------------
+
+export const submitOvertimeRequest = async (payload: any) => {
+  console.log('Stubbed OT Submission:', payload)
+  // TODO: Point to a future overtime table
+  return [{ id: 'stub-ot' }]
+}
+
+export const submitPaymentRequest = async (payload: any) => {
+  console.log('Stubbed Payment Submission:', payload)
+  // TODO: Point to a future payment/advance table
+  return [{ id: 'stub-payment' }]
+}
