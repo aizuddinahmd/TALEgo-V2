@@ -9,12 +9,39 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or Anon Key is missing. Check your environment variables.')
 }
 
+const memoryStorage: Record<string, string> = {}
+const customStorage = {
+  getItem: async (key: string) => {
+    try {
+      const val = await AsyncStorage.getItem(key)
+      if (val !== null) return val
+      return memoryStorage[key] || null
+    } catch (e) {
+      // Fallback to in-memory storage if AsyncStorage fails
+      return memoryStorage[key] || null
+    }
+  },
+  setItem: async (key: string, value: string) => {
+    try {
+      await AsyncStorage.setItem(key, value)
+    } catch (e) {
+      memoryStorage[key] = value
+    }
+  },
+  removeItem: async (key: string) => {
+    try {
+      await AsyncStorage.removeItem(key)
+    } catch (e) {
+      delete memoryStorage[key]
+    }
+  },
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    // Let Supabase handle web storage natively (localStorage), and use AsyncStorage for React Native
-    ...(Platform.OS !== 'web' && { storage: AsyncStorage }),
+    storage: customStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: Platform.OS === 'web',
+    detectSessionInUrl: false,
   },
 })

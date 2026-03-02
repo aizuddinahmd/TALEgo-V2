@@ -1,67 +1,8 @@
 'use client'
 
-import type { ReactNode } from 'react'
-import { TextLink } from 'solito/link'
-import { Text as RNText, View } from 'react-native'
-import { cssInterop } from 'nativewind'
-
-cssInterop(RNText, { className: 'style' })
-
-const Text = RNText
+import { EmployeeOverview } from 'app/features/overview/employee-overview'
 
 export function HomeScreen() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 16,
-        gap: 32,
-      }}
-    >
-      <H1>Welcome to Solito.</H1>
-      <View style={{ maxWidth: 600, gap: 16 }}>
-        <Text style={{ textAlign: 'center' }}>
-          Here is a basic starter to show you how you can navigate from one
-          screen to another. This screen uses the same code on Next.js and React
-          Native.
-        </Text>
-        <Text style={{ textAlign: 'center' }}>
-          Solito is made by{' '}
-          <TextLink
-            href="https://twitter.com/fernandotherojo"
-            target="_blank"
-            rel="noreferrer"
-            style={{ color: 'blue' }}
-          >
-            Fernando Rojo
-          </TextLink>
-          .
-        </Text>
-      </View>
-      <View style={{ flexDirection: 'row', gap: 32 }}>
-        <TextLink
-          href="/users/fernando"
-          style={{
-            fontSize: 16,
-            fontWeight: 'bold',
-            color: 'blue',
-          }}
-        >
-          Link
-        </TextLink>
-        {/* @ts-ignore */}
-        <Text className="text-red-500 text-3xl font-bold mt-4">Tailwind works!</Text>
-      </View>
-    </View>
-  )
+  return <EmployeeOverview />
 }
 
-const H1 = ({ children }: { children: ReactNode }) => {
-  return <Text style={{ fontWeight: '800', fontSize: 24 }}>{children}</Text>
-}
-
-const P = ({ children }: { children: ReactNode }) => {
-  return <Text style={{ textAlign: 'center' }}>{children}</Text>
-}

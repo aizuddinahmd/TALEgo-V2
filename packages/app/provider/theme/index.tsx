@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { View } from 'react-native';
+import { useColorScheme } from 'nativewind';
 
 type ThemeMode = 'classic' | 'neo';
 type ColorMode = 'light' | 'dark';
@@ -24,6 +25,8 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+    const { setColorScheme } = useColorScheme();
+    
     // Structural Mode: 'classic' | 'neo'
     const [themeMode, setThemeMode] = useState<ThemeMode>('classic');
     // Color Mode: 'light' | 'dark'
@@ -36,7 +39,16 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
             if (savedTheme) setThemeMode(savedTheme);
 
             const savedColor = localStorage.getItem('color_mode') as ColorMode | null;
-            if (savedColor) setColorMode(savedColor);
+            if (savedColor) {
+                setColorMode(savedColor);
+                setColorScheme(savedColor);
+            } else {
+                // Set default initial scheme if no saved preference
+                setColorScheme('dark');
+            }
+        } else {
+            // Default for native if storage not available or handled differently
+            setColorScheme('dark');
         }
     }, []);
 
@@ -49,6 +61,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     const toggleColorMode = (mode: ColorMode) => {
         setColorMode(mode);
+        setColorScheme(mode); // Sync with NativeWind
         if (typeof window !== 'undefined' && window.localStorage) {
             localStorage.setItem('color_mode', mode);
         }

@@ -6,6 +6,7 @@ import { Home, FileText, Zap, Inbox, User } from 'lucide-react-native'
 
 import { HomeScreen } from 'app/features/home/screen'
 import { UserDetailScreen } from 'app/features/user/detail-screen'
+import { ProfileScreen } from 'app/features/user/profile-screen'
 import { PayrollScreen } from 'app/features/payroll/screen'
 import { SignInScreen } from 'app/features/auth/SignIn'
 import { SignUpScreen } from 'app/features/auth/SignUp'
@@ -64,6 +65,7 @@ function TabNavigator() {
         component={HomeScreen}
         options={{
           title: 'Home',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
@@ -94,9 +96,10 @@ function TabNavigator() {
       />
       <Tab.Screen
         name="profile"
-        component={PlaceholderScreen}
+        component={ProfileScreen}
         options={{
           title: 'My Profile',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => <User color={color} size={size} />,
         }}
       />
