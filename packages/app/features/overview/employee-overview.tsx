@@ -5,6 +5,7 @@ import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Acti
 import { Svg, Circle, G, Text as SvgText } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { clockIn, clockOut, getTodayAttendance } from '../../api/attendance';
+import { getStaffProfile, fetchLeaveBalances } from '../../api/records';
 
 export const NOTIFICATIONS = [
   { id: '1', title: 'Leave Approved', time: '10 mins ago', icon: CheckCircle, color: 'text-green-500 dark:text-green-400' },
@@ -86,6 +87,8 @@ export function EmployeeOverview() {
   const [attendanceStatus, setAttendanceStatus] = useState<'absent' | 'active' | 'completed' | 'on_leave'>('absent');
   const [todayLog, setTodayLog] = useState<any>(null);
   const [todayShift, setTodayShift] = useState<any>(null);
+  const [leaveBalances, setLeaveBalances] = useState<any[]>([]);
+  const [staffInfo, setStaffInfo] = useState<any>(null);
 
   console.log('DEBUG: EmployeeOverview component scope. initialLoading:', initialLoading);
 
@@ -128,6 +131,31 @@ export function EmployeeOverview() {
       setAttendanceStatus(data.status);
       setTodayLog(data.log);
       setTodayShift(data.shift);
+
+      // Fetch Staff Profile and Leave Balances
+      const profile = await getStaffProfile();
+      if (profile) {
+        setStaffInfo(profile);
+        const balances = await fetchLeaveBalances(profile.staff_id);
+        
+        // Map common leave types to our display labels if needed
+        const mappedBalances = balances.map((b: any) => ({
+          label: b.leave_type?.leave_name || 'Other',
+          code: b.leave_type?.leave_code,
+          value: b.used_days || 0,
+          remaining: b.remaining_days || 0,
+          total: b.total_days || 1, // Avoid division by zero
+          color: '#D4AF37'
+        }));
+
+        // Try to find Unpaid, PTO, and "Other" (or just take first 3)
+        const unpaid = mappedBalances.find(b => b.code?.toLowerCase().includes('unpaid')) || mappedBalances[0];
+        const pto = mappedBalances.find(b => b.code?.toLowerCase().includes('annual') || b.code?.toLowerCase().includes('pto')) || mappedBalances[1];
+        const other = mappedBalances.find(b => b !== unpaid && b !== pto) || mappedBalances[2];
+
+        setLeaveBalances([unpaid, pto, other].filter(Boolean));
+      }
+
     } catch (error: any) {
       console.error('DEBUG: Error in fetchStatus:', error);
     } finally {
@@ -247,14 +275,14 @@ export function EmployeeOverview() {
             </View>
 
             <View className="flex-row justify-around items-center mb-6">
-              {LEAVE_BALANCES.map((leave, index) => (
+              {(leaveBalances.length > 0 ? leaveBalances : LEAVE_BALANCES).map((leave, index) => (
                 <View key={index} className="items-center">
                   <CircularProgress
                     size={80}
                     strokeWidth={8}
                     progress={(leave.value / leave.total) * 100}
                     color={leave.color}
-                    value={leave.value}
+                    value={leave.remaining} // Showing REMAINING days is more useful for balances
                   />
                   <Text className="text-slate-600 dark:text-slate-300 font-medium mt-3 text-sm">{leave.label}</Text>
                 </View>
