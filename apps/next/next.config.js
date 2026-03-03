@@ -79,6 +79,7 @@ const nextConfig = {
     'react-native-css-interop',
     'lucide-react-native',
     'react-native-svg',
+    'expo-linear-gradient',
   ],
 
   compiler: {

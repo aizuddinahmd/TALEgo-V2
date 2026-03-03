@@ -9,6 +9,7 @@
     "@supabase/supabase-js": "^2.97.0",
     "clsx": "^2.1.1",
     "dripsy": "^4.3.3",
+    "expo-linear-gradient": "^55.0.8",
     "moti": "^0.30.0",
     "solito": "next",
     "tailwind-merge": "^3.5.0"

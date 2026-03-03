@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, FlatList } from 'react-native';
-import { Calendar as CalendarIcon, Clock, MapPin, ChevronRight, User, AlertCircle, RefreshCw, Send } from 'lucide-react-native';
+import { Calendar as CalendarIcon, Clock, MapPin, ChevronRight, User, AlertCircle, RefreshCw, Send, ChevronLeft } from 'lucide-react-native';
 
 // Mock Data
 const SHIFTS_MOCK = [
@@ -10,22 +10,35 @@ const SHIFTS_MOCK = [
   { id: '4', date: '2026-02-27', start_time: '09:00 AM', end_time: '05:00 PM', location: 'HQ Building - Floor 3', role: 'Front Desk', status: 'Confirmed', duration: '8h' },
 ];
 
-const WEEK_DATES = [
-  { dayName: 'Mon', dayNumber: '23', fullDate: '2026-02-23' },
-  { dayName: 'Tue', dayNumber: '24', fullDate: '2026-02-24' },
-  { dayName: 'Wed', dayNumber: '25', fullDate: '2026-02-25' },
-  { dayName: 'Thu', dayNumber: '26', fullDate: '2026-02-26' },
-  { dayName: 'Fri', dayNumber: '27', fullDate: '2026-02-27' },
-  { dayName: 'Sat', dayNumber: '28', fullDate: '2026-02-28' },
-  { dayName: 'Sun', dayNumber: '01', fullDate: '2026-03-01' },
-  { dayName: 'Mon', dayNumber: '02', fullDate: '2026-03-02' },
-  { dayName: 'Tue', dayNumber: '03', fullDate: '2026-03-03' },
-  { dayName: 'Wed', dayNumber: '04', fullDate: '2026-03-04' },
-  { dayName: 'Thu', dayNumber: '05', fullDate: '2026-03-05' },
-  { dayName: 'Fri', dayNumber: '06', fullDate: '2026-03-06' },
-  { dayName: 'Sat', dayNumber: '07', fullDate: '2026-03-07' },
-  { dayName: 'Sun', dayNumber: '08', fullDate: '2026-03-08' },
-];
+// Helper to generate dates starting from a specific week's Monday
+const generateWeekDates = (weekOffset = 0) => {
+  const dates = [];
+  const today = new Date();
+  
+  // Get current day of week (0-6, 0 is Sunday)
+  const day = today.getDay();
+  // Calculate distance to previous Monday (1)
+  // If it's Sunday (0), we need to go back 6 days.
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1) + (weekOffset * 7);
+  
+  // Create a new date object for Monday of the offset week
+  const startDay = new Date(today.getFullYear(), today.getMonth(), diff);
+  
+  // Generate 14 days starting from that Monday
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(startDay);
+    d.setDate(startDay.getDate() + i);
+    
+    dates.push({
+      dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+      dayNumber: d.getDate().toString().padStart(2, '0'),
+      fullDate: d.toISOString().split('T')[0]
+    });
+  }
+  return dates;
+};
+
+const WEEK_DATES = generateWeekDates();
 
 const getStatusBadgeStyles = (status: string) => {
   switch (status.toLowerCase()) {
@@ -41,8 +54,15 @@ const getStatusBadgeStyles = (status: string) => {
 };
 
 export function ScheduleScreen() {
-  const [selectedDate, setSelectedDate] = useState('2026-02-23');
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [hasMounted, setHasMounted] = useState(false);
 
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  const weekDates = generateWeekDates(weekOffset);
   const filteredShifts = SHIFTS_MOCK.filter(shift => shift.date === selectedDate);
   const totalHoursThisWeek = '32h'; // Mocked aggregation
 
@@ -106,29 +126,63 @@ export function ScheduleScreen() {
 
         {/* Date Selector Row */}
         <View className="mb-6">
-          <Text className="text-sm font-bold text-slate-800 dark:text-white mb-3">Select Date</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 pb-2">
-            {WEEK_DATES.map((dateObj) => {
-              const isSelected = selectedDate === dateObj.fullDate;
-              return (
-                <TouchableOpacity
-                  key={dateObj.fullDate}
-                  onPress={() => setSelectedDate(dateObj.fullDate)}
-                  className={`items-center justify-center rounded-xl py-3 px-4 min-w-[70px] border shadow-sm ${
-                    isSelected
-                      ? 'bg-amber-400 border-amber-400'
-                      : 'bg-white border-slate-200 dark:bg-[#1A1A1A] dark:border-white/5'
-                  }`}
+          <View className="flex-row items-center justify-between mb-3">
+             <Text className="text-sm font-bold text-slate-800 dark:text-white">Select Date</Text>
+             <View className="flex-row items-center gap-2">
+                <TouchableOpacity 
+                   onPress={() => setWeekOffset(prev => prev - 1)}
+                   className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700"
                 >
-                  <Text className={`text-xs font-medium mb-1 ${isSelected ? 'text-black' : 'text-slate-500 dark:text-zinc-400'}`}>
-                    {dateObj.dayName}
-                  </Text>
-                  <Text className={`text-lg font-bold ${isSelected ? 'text-black' : 'text-slate-800 dark:text-white'}`}>
-                    {dateObj.dayNumber}
-                  </Text>
+                  <ChevronLeft size={16} className="text-slate-600 dark:text-zinc-400" />
                 </TouchableOpacity>
-              );
-            })}
+                <TouchableOpacity 
+                   onPress={() => {
+                     setWeekOffset(0);
+                     setSelectedDate(new Date().toISOString().split('T')[0]);
+                   }}
+                   className="px-2 py-1 rounded bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700"
+                >
+                  <Text className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase">Today</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                   onPress={() => setWeekOffset(prev => prev + 1)}
+                   className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700"
+                >
+                  <ChevronRight size={16} className="text-slate-600 dark:text-zinc-400" />
+                </TouchableOpacity>
+             </View>
+          </View>
+          
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 pb-2">
+            {!hasMounted ? (
+              // Stable placeholder for hydration
+              <View className="items-center justify-center rounded-xl py-3 px-4 min-w-[70px] bg-white border-slate-200 dark:bg-[#1A1A1A] dark:border-white/5 opacity-50">
+                <Text className="text-xs font-medium mb-1 text-slate-500">-</Text>
+                <Text className="text-lg font-bold text-slate-800 dark:text-white">-</Text>
+              </View>
+            ) : (
+              weekDates.map((dateObj) => {
+                const isSelected = selectedDate === dateObj.fullDate;
+                return (
+                  <TouchableOpacity
+                    key={dateObj.fullDate}
+                    onPress={() => setSelectedDate(dateObj.fullDate)}
+                    className={`items-center justify-center rounded-xl py-3 px-4 min-w-[70px] border shadow-sm ${
+                      isSelected
+                        ? 'bg-amber-400 border-amber-400'
+                        : 'bg-white border-slate-200 dark:bg-[#1A1A1A] dark:border-white/5'
+                    }`}
+                  >
+                    <Text className={`text-xs font-medium mb-1 ${isSelected ? 'text-black' : 'text-slate-500 dark:text-zinc-400'}`}>
+                      {dateObj.dayName}
+                    </Text>
+                    <Text className={`text-lg font-bold ${isSelected ? 'text-black' : 'text-slate-800 dark:text-white'}`}>
+                      {dateObj.dayNumber}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })
+            )}
             
             {/* View Calendar Button (For Web or extended mobile) */}
             <TouchableOpacity className="items-center justify-center rounded-xl py-3 px-4 min-w-[70px] bg-slate-100 border border-slate-200 dark:bg-[#1A1A1A] dark:border-white/5 ml-2 shadow-sm">
@@ -140,7 +194,9 @@ export function ScheduleScreen() {
 
         {/* Content Area - Shift Feed */}
         <View className="flex-1">
-          <Text className="text-sm font-bold text-slate-800 dark:text-white mb-3">Shifts for {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric'})}</Text>
+          <Text className="text-sm font-bold text-slate-800 dark:text-white mb-3">
+            Shifts for {hasMounted ? new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric'}) : '...'}
+          </Text>
           
           {filteredShifts.length === 0 ? (
             // Empty State

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Activity, LogOut } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { clockIn, clockOut, getTodayAttendance } from '../../api/attendance';
 
 export const NOTIFICATIONS = [
@@ -41,16 +42,20 @@ export function EmployeeOverview() {
 
   console.log('DEBUG: EmployeeOverview component scope. initialLoading:', initialLoading);
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
-  
-  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }));
+  const [currentDate, setCurrentDate] = useState('');
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    }));
+    setCurrentTime(new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }));
+  }, []);
 
   useEffect(() => {
     console.log('DEBUG: EmployeeOverview mounting effect');
@@ -122,14 +127,19 @@ export function EmployeeOverview() {
       <ScrollView className="flex-1" contentContainerClassName="p-4 md:p-6 lg:p-8">
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-slate-500 dark:text-brand-gold font-medium text-lg mb-1">TALEgo Dashboard</Text>
-          <Text className="text-2xl font-bold text-slate-800 dark:text-slate-50">Employee Overview</Text>
+          {/* <Text className="text-slate-500 dark:text-brand-gold font-medium text-lg mb-1">TALEgo Dashboard</Text> */}
+          <Text className="text-2xl font-bold text-slate-800 dark:text-brand-gold">Employee Overview</Text>
         </View>
 
         {/* Top Section */}
         <View className="flex-col lg:flex-row gap-4 mb-8">
           {/* Clock Card */}
-          <View className="flex-1 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
+          <LinearGradient
+            colors={['#1c1c16', '#111111']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: 12, padding: 24, flex: 1, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.1)' }}
+          >
             <View className="flex-row items-center justify-between mb-6">
               <View>
                 <Text className="text-slate-500 dark:text-slate-400 font-medium">{currentDate}</Text>
@@ -178,7 +188,7 @@ export function EmployeeOverview() {
                 </TouchableOpacity>
               )}
             </View>
-          </View>
+          </LinearGradient>
 
           {/* Notifications Card */}
           <View className="flex-1 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
