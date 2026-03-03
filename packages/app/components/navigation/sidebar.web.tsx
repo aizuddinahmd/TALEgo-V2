@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { 
   LayoutDashboard, 
   FileText, 
@@ -16,96 +16,20 @@ import { usePathname, useRouter } from 'next/navigation'
 import { getCurrentUser, signOut } from '../../api/auth'
 import { supabase } from '../../utils/supabase'
 
-export function Sidebar() {
-  const router = useRouter()
-  const pathname = usePathname()
-  
-  const [user, setUser] = useState<{ displayName: string; email: string } | null>(null)
-
-  useEffect(() => {
-    const fetchProfile = async (session: any) => {
-      console.log('Sidebar: fetchProfile called with session:', session?.user?.id)
-      if (!session?.user) {
-        console.log('Sidebar: No session user found, returning')
-        return;
-      }
-      
-      const currentUser = session.user;
-      const email = currentUser.email || '';
-      const fallbackName = email ? email.split('@')[0] : 'User';
-      
-      console.log('Sidebar: Current user email:', email)
-
-      try {
-        if (email) {
-          console.log('Sidebar: Querying staff_profiles for email:', email)
-          const { data, error } = await supabase
-            .from('staff_profiles')
-            .select('full_name')
-            .eq('email', email)
-            .single()
-
-          console.log('Sidebar: staff_profiles query result:', { data, error })
-
-          if (data && !error) {
-            setUser({
-              displayName: data.full_name || fallbackName,
-              email: email,
-            })
-            console.log('Sidebar: User set from staff_profiles:', data.full_name)
-            return;
-          }
-        }
-      } catch (err) {
-        console.error('Sidebar: Error fetching profile:', err)
-      }
-
-      console.log('Sidebar: Falling back to email/fallbackName:', fallbackName)
-      setUser({
-        displayName: fallbackName,
-        email: email,
-      })
-    }
-
-    // 1. Initial fetch
-    console.log('Sidebar: Fetching initial session...')
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('Sidebar: Initial getSession result:', { hasSession: !!session, error })
-      if (session) fetchProfile(session)
-    })
-
-    // 2. Listen for auth changes (login/logout/token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Sidebar: onAuthStateChange event:', event, 'hasSession:', !!session)
-      if (session) {
-        fetchProfile(session)
-      } else {
-        setUser(null)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      router.push('/login')
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
-  }
-
-  // Extract simple path for active check
-  const isActive = (path: string) => pathname === path
-
-  isActive: (path: string) => boolean
-  onNavigate: (path: string) => void
-  isParentActive?: boolean
-  level?: number
-  badge?: string
+function NavItem({ 
+  item, 
+  pathname, 
+  isActive, 
+  onNavigate, 
+  level = 0, 
+  badge 
+}: { 
+  item: any; 
+  pathname: string; 
+  isActive: (path: string) => boolean; 
+  onNavigate: (path: string) => void; 
+  level?: number; 
+  badge?: string; 
 }) {
   const [isOpen, setIsOpen] = useState(item.defaultOpen || false)
   const active = isActive(item.path)

@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
+  TextInput,
 } from 'react-native'
 import { MotiView, AnimatePresence } from 'moti'
 import {
@@ -15,6 +17,7 @@ import {
   Activity,
   AlertCircle,
   FileText,
+  Search,
   MoreHorizontal,
 } from 'lucide-react-native'
 import { fetchLeaveBalances, getStaffProfile, fetchLeaveRecords, fetchExpenseRecords, fetchAttendanceRecords } from '../../api/records'
@@ -271,18 +274,19 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
 
           {/* Search bar */}
           <View className="bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-2 flex-row items-center gap-3 w-full lg:w-64">
-            <receipt size={16} className="text-slate-400" />
-            <input 
+            <Search size={16} className="text-slate-400" />
+            <TextInput 
               placeholder="Search records..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="#94a3b8"
               className="bg-transparent text-sm text-slate-800 dark:text-white outline-none w-full"
             />
           </View>
         </View>
 
         {/* Sub-Filters */}
-        <AnimatePresence exitBeforeEnter={true}>
+        <AnimatePresence>
           <MotiView
             key={activeTab}
             from={{ opacity: 0, translateY: -10 }}
