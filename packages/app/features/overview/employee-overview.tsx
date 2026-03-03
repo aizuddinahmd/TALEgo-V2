@@ -1,13 +1,16 @@
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
-import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Activity } from 'lucide-react-native';
+// packages/app/features/overview/employee-overview.tsx
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Activity, LogOut } from 'lucide-react-native';
+import { clockIn, clockOut, getTodayAttendance } from '../../api/attendance';
 
-const NOTIFICATIONS = [
+export const NOTIFICATIONS = [
   { id: '1', title: 'Leave Approved', time: '10 mins ago', icon: CheckCircle, color: 'text-green-500 dark:text-green-400' },
   { id: '2', title: 'New Shift Assigned', time: '1 hour ago', icon: Calendar, color: 'text-blue-500 dark:text-blue-400' },
   { id: '3', title: 'System Maintenance', time: '2 hours ago', icon: AlertCircle, color: 'text-orange-500 dark:text-orange-400' },
 ];
 
-const STATISTICS = [
+export const STATISTICS = [
   { id: '1', label: 'Present', value: '18', icon: CheckCircle, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/30' },
   { id: '2', label: 'Late', value: '2', icon: Clock, color: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-100 dark:bg-orange-900/30' },
   { id: '3', label: 'Absent', value: '0', icon: AlertCircle, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30' },
@@ -16,12 +19,12 @@ const STATISTICS = [
   { id: '6', label: 'Productivity', value: '94%', icon: Activity, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-900/30' },
 ];
 
-const PENDING_APPLICATIONS = [
+export const PENDING_APPLICATIONS = [
   { id: '1', type: 'Annual Leave', date: 'Oct 12 - Oct 15', status: 'Pending Approval' },
   { id: '2', type: 'Expense Claim', date: 'Sep 28', status: 'In Review' },
 ];
 
-const SHIFT_SCHEDULE = [
+export const SHIFT_SCHEDULE = [
   { day: 'MON', time: '9:00 - 5:00' },
   { day: 'TUE', time: '9:00 - 5:00' },
   { day: 'WED', time: '10:00 - 6:00' },
@@ -30,16 +33,89 @@ const SHIFT_SCHEDULE = [
 ];
 
 export function EmployeeOverview() {
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [attendanceStatus, setAttendanceStatus] = useState<'absent' | 'active' | 'completed' | 'on_leave'>('absent');
+  const [todayLog, setTodayLog] = useState<any>(null);
+  const [todayShift, setTodayShift] = useState<any>(null);
+
+  console.log('DEBUG: EmployeeOverview component scope. initialLoading:', initialLoading);
+
   const currentDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
   });
   
-  const currentTime = new Date().toLocaleTimeString('en-US', {
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
-  });
+  }));
+
+  useEffect(() => {
+    console.log('DEBUG: EmployeeOverview mounting effect');
+    fetchStatus();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchStatus = async () => {
+    console.log('DEBUG: fetchStatus called');
+    try {
+      console.log('DEBUG: Calling getTodayAttendance...');
+      const data = await getTodayAttendance();
+      console.log('DEBUG: getTodayAttendance response:', data);
+      setAttendanceStatus(data.status);
+      setTodayLog(data.log);
+      setTodayShift(data.shift);
+    } catch (error: any) {
+      console.error('DEBUG: Error in fetchStatus:', error);
+    } finally {
+      console.log('DEBUG: fetchStatus finished, setting initialLoading to false');
+      setInitialLoading(false);
+    }
+  };
+
+  const handleClockAction = async () => {
+    setLoading(true);
+    try {
+      // Dummy coordinates for now: KL coordinates
+      const dummyLat = 3.1390;
+      const dummyLng = 101.6869;
+
+      if (attendanceStatus === 'absent') {
+        const result = await clockIn(dummyLat, dummyLng);
+        Alert.alert('Success', result.message || 'Clocked in successfully');
+      } else if (attendanceStatus === 'active') {
+        const result = await clockOut(dummyLat, dummyLng);
+        Alert.alert('Success', result.message || 'Clocked out successfully');
+      }
+      
+      // Refresh status after action
+      await fetchStatus();
+    } catch (error: any) {
+      console.error('Clock action error:', error);
+      Alert.alert('Error', error.data?.message || error.message || 'Failed to complete action');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <View className="flex-1 bg-brand-black items-center justify-center">
+        <ActivityIndicator size="large" color="#D4AF37" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50 dark:bg-brand-black">
@@ -57,7 +133,15 @@ export function EmployeeOverview() {
             <View className="flex-row items-center justify-between mb-6">
               <View>
                 <Text className="text-slate-500 dark:text-slate-400 font-medium">{currentDate}</Text>
-                <Text className="text-4xl font-bold text-slate-800 dark:text-slate-50 mt-1">{currentTime}</Text>
+                <View className="flex-row items-baseline gap-2">
+                  <Text className="text-4xl font-bold text-slate-800 dark:text-slate-50 mt-1">{currentTime}</Text>
+                </View>
+                {todayLog && (
+                   <Text className="text-zinc-500 text-xs mt-2">
+                     {attendanceStatus === 'active' ? `In: ${new Date(todayLog.checkin_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 
+                      `Work session completed`}
+                   </Text>
+                )}
               </View>
               <View className="w-12 h-12 bg-blue-100 dark:bg-brand-gold/20 rounded-full items-center justify-center">
                 <Clock className="text-blue-600 dark:text-brand-gold" size={24} />
@@ -65,13 +149,34 @@ export function EmployeeOverview() {
             </View>
             
             <View className="flex-row items-center gap-4">
-              <TouchableOpacity className="flex-1 bg-blue-600 dark:bg-brand-gold rounded-lg py-4 flex-row items-center justify-center gap-2 active:bg-blue-700 dark:active:bg-brand-gold/80">
-                <MapPin color="white" size={20} />
-                <Text className="text-white font-bold text-base">Clock In</Text>
-              </TouchableOpacity>
-              <View className="w-14 h-14 bg-slate-100 dark:bg-zinc-800/50 rounded-lg border border-slate-200 dark:border-zinc-700/50 items-center justify-center">
-                <MapPin className="text-slate-400 dark:text-slate-500" size={20} />
-              </View>
+              {attendanceStatus === 'completed' ? (
+                <View className="flex-1 bg-green-500/10 border border-green-500/20 rounded-lg py-4 items-center justify-center flex-row gap-2">
+                   <CheckCircle color="#22C55E" size={20} />
+                   <Text className="text-green-500 font-bold text-base">Shift Completed</Text>
+                </View>
+              ) : attendanceStatus === 'on_leave' ? (
+                <View className="flex-1 bg-blue-500/10 border border-blue-500/20 rounded-lg py-4 items-center justify-center flex-row gap-2">
+                   <Calendar color="#3B82F6" size={20} />
+                   <Text className="text-blue-500 font-bold text-base">On Approved Leave</Text>
+                </View>
+              ) : (
+                <TouchableOpacity 
+                  disabled={loading}
+                  onPress={handleClockAction}
+                  className={`flex-1 ${attendanceStatus === 'active' ? 'bg-red-500' : 'bg-blue-600 dark:bg-brand-gold'} rounded-lg py-4 flex-row items-center justify-center gap-2 active:opacity-80`}
+                >
+                  {loading ? (
+                    <ActivityIndicator size="small" color={attendanceStatus === 'active' ? 'white' : 'black'} />
+                  ) : (
+                    <>
+                      {attendanceStatus === 'active' ? <LogOut color="white" size={20} /> : <MapPin color="black" size={20} />}
+                      <Text className={`${attendanceStatus === 'active' ? 'text-white' : 'text-black'} font-bold text-base`}>
+                        {attendanceStatus === 'active' ? 'Clock Out' : 'Clock In'}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
