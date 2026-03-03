@@ -36,17 +36,17 @@ export const getSession = async () => {
 }
 
 export const verifyInvitation = async (email: string, token: string) => {
-  const { data, error } = await supabase
-    .from('staff_profiles')
-    .select('staff_id, ic_number')
-    .eq('email', email)
-    .single()
+  const { data, error } = await supabase.rpc('verify_staff_invitation', {
+    p_email: email,
+    p_ic_number: token,
+  })
 
-  if (error || !data) {
+  if (error) {
+    console.error('Verification error:', error)
     return false
   }
 
-  return data.ic_number === token
+  return !!data
 }
 
 export const signUpWithEmail = async (email: string, password?: string) => {
@@ -55,5 +55,6 @@ export const signUpWithEmail = async (email: string, password?: string) => {
     password: password || '',
   })
   if (error) throw error
+
   return data
 }
