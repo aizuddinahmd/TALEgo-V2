@@ -1,7 +1,8 @@
 // packages/app/features/overview/employee-overview.tsx
 import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
-import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Activity, LogOut } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Activity, LogOut, ChevronRight } from 'lucide-react-native';
+import { Svg, Circle, G, Text as SvgText } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { clockIn, clockOut, getTodayAttendance } from '../../api/attendance';
 
@@ -32,6 +33,52 @@ export const SHIFT_SCHEDULE = [
   { day: 'THU', time: '9:00 - 5:00' },
   { day: 'FRI', time: '9:00 - 5:00' },
 ];
+
+export const LEAVE_BALANCES = [
+  { label: 'Unpaid', value: 15, total: 20, color: '#D4AF37' },
+  { label: 'PTO', value: 3, total: 10, color: '#D4AF37' },
+  { label: 'Other', value: 23, total: 30, color: '#D4AF37' },
+];
+
+function CircularProgress({ size, strokeWidth, progress, color, label, value }: any) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={size} height={size}>
+        <G rotation="-90" origin={`${size / 2}, ${size / 2}`}>
+          {/* Background Circle */}
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="rgba(139, 92, 246, 0.1)"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+          />
+          {/* Progress Circle */}
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            fill="transparent"
+          />
+        </G>
+      </Svg>
+      <View style={{ position: 'absolute', alignItems: 'center' }}>
+        <Text className="text-xl font-bold text-slate-800 dark:text-white leading-tight">{value}</Text>
+        <Text className="text-[10px] text-slate-500 dark:text-zinc-500 font-medium">Days</Text>
+      </View>
+    </View>
+  );
+}
 
 export function EmployeeOverview() {
   const [loading, setLoading] = useState(false);
@@ -190,8 +237,51 @@ export function EmployeeOverview() {
             </View>
           </LinearGradient>
 
-          {/* Notifications Card */}
+          {/* Leave Balances Widget */}
           <View className="flex-1 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
+            <View className="flex-row items-center justify-between mb-6">
+              <Text className="text-lg font-bold text-slate-800 dark:text-slate-50">Leave balances</Text>
+              {/* <TouchableOpacity>
+                <Text className="text-blue-600 dark:text-blue-400 font-medium underline">View leave balances</Text>
+              </TouchableOpacity> */}
+            </View>
+
+            <View className="flex-row justify-around items-center mb-6">
+              {LEAVE_BALANCES.map((leave, index) => (
+                <View key={index} className="items-center">
+                  <CircularProgress
+                    size={80}
+                    strokeWidth={8}
+                    progress={(leave.value / leave.total) * 100}
+                    color={leave.color}
+                    value={leave.value}
+                  />
+                  <Text className="text-slate-600 dark:text-slate-300 font-medium mt-3 text-sm">{leave.label}</Text>
+                </View>
+              ))}
+            </View>
+
+            <TouchableOpacity 
+              className="w-full bg-brand-gold rounded-xl py-4 items-center justify-center active:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+              style={{
+                shadowColor: '#D4AF37',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.5,
+                shadowRadius: 12,
+                elevation: 10, // Some standard shadow for android
+              }}
+            >
+              <Text className="text-brand-black font-bold text-base uppercase tracking-tight">Request leave</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Top Section Part 2 (Notifications) */}
+        <View className="mb-8">
+          {/* Notifications Card - Moved to full width or could stay in a row, but dashboard getting full. 
+              Let's put Notifications in a row with future widgets if needed. 
+              For now keeping it below the Clock/Leave row. */}
+          <View className="bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold">Notifications</Text>
               <TouchableOpacity>
