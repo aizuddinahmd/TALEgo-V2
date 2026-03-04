@@ -24,7 +24,7 @@ import { fetchLeaveBalances, getStaffProfile, fetchLeaveRecords, fetchExpenseRec
 import { LeaveApplicationModal } from './LeaveApplicationModal'
 
 export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
-  const [activeTab, setActiveTab] = useState(initialTab || 'expenses') 
+  const activeTab = initialTab || 'expenses'
   const [filter, setFilter] = useState('All')
   const [searchQuery, setSearchQuery] = useState('')
   const [staffId, setStaffId] = useState<string | null>(null)
@@ -33,13 +33,6 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
   const [balances, setBalances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  // Sync activeTab with initialTab if it changes (e.g. from routing)
-  useEffect(() => {
-    if (initialTab) {
-      setActiveTab(initialTab)
-    }
-  }, [initialTab])
 
   useEffect(() => {
     const initStaff = async () => {
@@ -197,9 +190,9 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
                 }
               }
             }}
-            className="bg-brand-blue rounded-lg px-6 py-3 flex-row items-center gap-2 active:opacity-80 shadow-lg shadow-brand-blue/20"
+            className="bg-brand-gold rounded-lg px-6 py-3 flex-row items-center gap-2 active:opacity-80 shadow-lg shadow-brand-gold/20"
           >
-            <Text className="text-white font-bold text-sm">
+            <Text className="text-black font-bold text-sm">
               + New {activeTabLabel} Entry
             </Text>
           </TouchableOpacity>
@@ -238,41 +231,8 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
           </View>
         )}
 
-        {/* Main Tabs and Actions */}
-        <View className="flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
-          <View className="bg-zinc-200 dark:bg-[#1A1A1A] border border-slate-300 dark:border-white/5 rounded-xl p-1 max-w-full">
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="flex-row items-center"
-            >
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.id
-
-                return (
-                  <TouchableOpacity
-                    key={tab.id}
-                    onPress={() => setActiveTab(tab.id)}
-                    className={`px-5 py-2.5 rounded-lg mr-1 ${
-                      isActive ? 'bg-white dark:bg-white/10 shadow-sm' : 'bg-transparent'
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-bold ${
-                        isActive
-                          ? 'text-brand-blue'
-                          : 'text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
-                      }`}
-                    >
-                      {tab.label}
-                    </Text>
-                  </TouchableOpacity>
-                )
-              })}
-            </ScrollView>
-          </View>
-
-          {/* Search bar */}
+        {/* Search bar */}
+        <View className="flex-col lg:flex-row justify-end items-center mb-6 gap-4">
           <View className="bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-2 flex-row items-center gap-3 w-full lg:w-64">
             <Search size={16} className="text-slate-400" />
             <TextInput 
@@ -311,7 +271,7 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
                     onPress={() => setFilter(status)}
                     className={`px-4 py-1.5 rounded-full border mr-2 ${
                       isFilterActive
-                        ? 'bg-brand-blue/10 dark:bg-brand-blue/20 border-brand-blue/30 shadow-sm text-brand-blue'
+                        ? 'bg-brand-gold/10 dark:bg-brand-gold/20 border-brand-gold/30 shadow-sm text-brand-gold'
                         : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500'
                     }`}
                   >
@@ -408,7 +368,7 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
 
                       {/* Ref No */}
                       <View className="flex-[1.5]">
-                        <Text className="text-sm font-medium text-brand-blue dark:text-brand-blue font-mono">
+                        <Text className="text-sm font-medium text-brand-gold dark:text-brand-gold font-mono">
                           {item.refNo}
                         </Text>
                       </View>

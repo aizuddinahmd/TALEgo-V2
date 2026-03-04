@@ -9,7 +9,6 @@ const theme = {
       'brand-gold': '#D4AF37',
       'brand-black': '#0F0F0F',
       'brand-dark-gray': '#1A1A1A',
-      'brand-blue': '#3B82F6',
       'glass-bg': 'rgba(20, 20, 20, 0.7)',
       'glass-border': 'rgba(212, 175, 55, 0.3)',
     },

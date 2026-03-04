@@ -64,7 +64,6 @@ function NavItem({
       >
         <div className="flex items-center gap-3">
           {item.icon && <item.icon size={18} className={isSelected ? 'text-brand-gold' : 'text-gray-500'} />}
-          {!item.icon && level > 0 && <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40 mr-1" />}
           <span className="text-sm">{item.name}</span>
         </div>
         <div className="flex items-center gap-2">
