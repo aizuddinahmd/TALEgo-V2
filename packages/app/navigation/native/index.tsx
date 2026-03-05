@@ -11,6 +11,7 @@ import { PayrollScreen } from 'app/features/payroll/screen'
 import { SignInScreen } from 'app/features/auth/SignIn'
 import { SignUpScreen } from 'app/features/auth/SignUp'
 import { ScheduleScreen } from 'app/features/schedule/screen'
+import { ActivityScreen } from 'app/features/activity/screen'
 import { useTheme } from 'app/provider/theme'
 import { useFab } from 'app/provider/fab'
 import { FabOverlay } from '../../components/navigation/fab-overlay'
@@ -149,7 +150,7 @@ const TabNavigator = React.memo(function TabNavigator() {
       />
       <Tab.Screen
         name="activity"
-        component={PlaceholderScreen}
+        component={ActivityScreen}
         options={{
           title: 'Activity',
           tabBarIcon: ({ color }) => <Compass color={color} size={24} strokeWidth={2.5} />,
