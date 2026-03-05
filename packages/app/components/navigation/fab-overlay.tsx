@@ -41,8 +41,8 @@ const ActionItem = React.memo(({ item, index, width, onPress, isExit }: any) => 
       exit={{ opacity: 0, scale: 0.8, translateY: 10 }}
       transition={{
         type: 'timing',
-        duration: isExit ? 100 : 180,
-        delay: isExit ? 0 : index * 15,
+        duration: isExit ? 80 : 150,
+        delay: isExit ? 0 : index * 10,
       }}
       style={{ width: itemWidth }}
       className="items-center mb-6"
@@ -51,13 +51,6 @@ const ActionItem = React.memo(({ item, index, width, onPress, isExit }: any) => 
         onPress={() => onPress(item.id)}
         className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md mb-2"
         activeOpacity={0.7}
-        style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 5,
-          elevation: 3,
-        }}
       >
         <item.icon color={item.color} size={28} strokeWidth={2} />
       </TouchableOpacity>
@@ -91,16 +84,15 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
       {isOpen && (
         <View 
           style={[StyleSheet.absoluteFill, { zIndex: 999 }]} 
-          pointerEvents={isOpen ? 'auto' : 'none'}
+          pointerEvents="auto" // Always auto when mounted
         >
           {/* Gaussian Blur / Dark Overlay */}
           <MotiView
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ type: 'timing', duration: 150 }}
+            transition={{ type: 'timing', duration: 100 }}
             style={StyleSheet.absoluteFill}
-            pointerEvents={isOpen ? 'auto' : 'none'}
           >
             {Platform.OS === 'ios' ? (
               <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill}>
