@@ -198,12 +198,12 @@ export function EmployeeOverview() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-brand-black">
+    <SafeAreaView className="flex-1 bg-brand-black">
       <ScrollView className="flex-1" contentContainerClassName="p-4 md:p-6 lg:p-8">
         {/* Header */}
         <View className="mb-6">
           {/* <Text className="text-slate-500 dark:text-brand-gold font-medium text-lg mb-1">TALEgo Dashboard</Text> */}
-          <Text className="text-2xl font-bold text-slate-800 dark:text-brand-gold">Employee Overview</Text>
+          <Text className="text-2xl font-bold text-brand-gold">Employee Overview</Text>
         </View>
 
         {/* Top Section */}
@@ -219,7 +219,7 @@ export function EmployeeOverview() {
               <View>
                 <Text className="text-slate-500 dark:text-slate-400 font-medium">{currentDate}</Text>
                 <View className="flex-row items-baseline gap-2">
-                  <Text className="text-4xl font-bold text-slate-800 dark:text-slate-50 mt-1">{currentTime}</Text>
+                  <Text className="text-4xl font-bold text-slate-50 mt-1">{currentTime}</Text>
                 </View>
                 {todayLog && (
                    <Text className="text-zinc-500 text-xs mt-2">
@@ -266,9 +266,9 @@ export function EmployeeOverview() {
           </LinearGradient>
 
           {/* Leave Balances Widget */}
-          <View className="flex-1 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
+          <View className="flex-1 bg-brand-dark-gray rounded-xl border border-zinc-800/50 shadow-sm p-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-lg font-bold text-slate-800 dark:text-slate-50">Leave balances</Text>
+              <Text className="text-lg font-bold text-slate-50">Leave balances</Text>
               {/* <TouchableOpacity>
                 <Text className="text-blue-600 dark:text-blue-400 font-medium underline">View leave balances</Text>
               </TouchableOpacity> */}
@@ -284,7 +284,7 @@ export function EmployeeOverview() {
                     color={leave.color}
                     value={leave.remaining} // Showing REMAINING days is more useful for balances
                   />
-                  <Text className="text-slate-600 dark:text-slate-300 font-medium mt-3 text-sm">{leave.label}</Text>
+                  <Text className="text-slate-300 font-medium mt-3 text-sm">{leave.label}</Text>
                 </View>
               ))}
             </View>
@@ -309,9 +309,9 @@ export function EmployeeOverview() {
           {/* Notifications Card - Moved to full width or could stay in a row, but dashboard getting full. 
               Let's put Notifications in a row with future widgets if needed. 
               For now keeping it below the Clock/Leave row. */}
-          <View className="bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-6">
+          <View className="bg-brand-dark-gray rounded-xl border border-zinc-800/50 shadow-sm p-6">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold">Notifications</Text>
+              <Text className="text-lg font-bold text-brand-gold">Notifications</Text>
               <TouchableOpacity>
                 <Text className="text-blue-600 dark:text-blue-400 font-medium">View All</Text>
               </TouchableOpacity>
@@ -325,7 +325,7 @@ export function EmployeeOverview() {
                       <IconComponent className={item.color} size={20} />
                     </View>
                     <View className="flex-1 border-b border-slate-50 dark:border-zinc-800/50 pb-3">
-                      <Text className="text-slate-800 dark:text-slate-200 font-medium">{item.title}</Text>
+                      <Text className="text-slate-200 font-medium">{item.title}</Text>
                       <Text className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{item.time}</Text>
                     </View>
                   </View>
@@ -337,7 +337,7 @@ export function EmployeeOverview() {
 
         {/* Statistics Grid */}
         <View className="mb-8">
-          <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold mb-4">Statistics</Text>
+          <Text className="text-lg font-bold text-brand-gold mb-4">Statistics</Text>
           {/* Mobile view: Horizontal ScrollView */}
           <ScrollView 
             horizontal 
@@ -348,11 +348,11 @@ export function EmployeeOverview() {
             {STATISTICS.map((stat) => {
               const IconComponent = stat.icon;
               return (
-                <View key={stat.id} className="w-36 bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-4">
+                <View key={stat.id} className="w-36 bg-brand-dark-gray rounded-xl border border-zinc-800/50 shadow-sm p-4">
                   <View className={`w-10 h-10 ${stat.bg} rounded-full items-center justify-center mb-3`}>
                     <IconComponent className={stat.color} size={20} />
                   </View>
-                  <Text className="text-2xl font-bold text-slate-800 dark:text-slate-50">{stat.value}</Text>
+                  <Text className="text-2xl font-bold text-slate-50">{stat.value}</Text>
                   <Text className="text-slate-500 dark:text-slate-400 text-sm mt-1">{stat.label}</Text>
                 </View>
               );
@@ -364,7 +364,7 @@ export function EmployeeOverview() {
             {STATISTICS.map((stat) => {
               const IconComponent = stat.icon;
               return (
-                <View key={stat.id} className="w-[30%] lg:w-[15%] flex-grow bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-4">
+                <View key={stat.id} className="w-[30%] lg:w-[15%] flex-grow bg-brand-dark-gray rounded-xl border border-zinc-800/50 shadow-sm p-4">
                   <View className={`w-10 h-10 ${stat.bg} rounded-full items-center justify-center mb-3`}>
                      <IconComponent className={stat.color} size={20} />
                   </View>
@@ -380,16 +380,16 @@ export function EmployeeOverview() {
         <View className="flex-col lg:flex-row gap-6 mb-8">
           {/* Pending Applications */}
           <View className="flex-1">
-            <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold mb-4">Pending Applications</Text>
-            <View className="bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm px-4 pt-4 pb-1">
+            <Text className="text-lg font-bold text-brand-gold mb-4">Pending Applications</Text>
+            <View className="bg-brand-dark-gray rounded-xl border border-zinc-800/50 shadow-sm px-4 pt-4 pb-1">
               {PENDING_APPLICATIONS.map((app, index) => (
                 <View key={app.id} className={`flex-row justify-between items-center pb-3 mb-3 ${index !== PENDING_APPLICATIONS.length - 1 ? 'border-b border-slate-100 dark:border-zinc-800' : ''}`}>
                   <View>
-                    <Text className="text-slate-800 dark:text-slate-200 font-medium">{app.type}</Text>
+                    <Text className="text-slate-200 font-medium">{app.type}</Text>
                     <Text className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">{app.date}</Text>
                   </View>
-                  <View className="bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-3 py-1 rounded-full">
-                    <Text className="text-slate-600 dark:text-slate-300 text-xs font-medium">{app.status}</Text>
+                  <View className="bg-zinc-800 border border-zinc-700 px-3 py-1 rounded-full">
+                    <Text className="text-slate-300 text-xs font-medium">{app.status}</Text>
                   </View>
                 </View>
               ))}
@@ -399,16 +399,16 @@ export function EmployeeOverview() {
           {/* Shift Schedule */}
           <View className="flex-1 lg:flex-[2]">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold text-slate-800 dark:text-brand-gold">Shift Schedule</Text>
+              <Text className="text-lg font-bold text-brand-gold">Shift Schedule</Text>
               <TouchableOpacity>
                 <Text className="text-blue-600 dark:text-blue-400 font-medium">View Calendar</Text>
               </TouchableOpacity>
             </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-3 pr-8 lg:pr-0">
               {SHIFT_SCHEDULE.map((shift, index) => (
-                <View key={index} className="bg-white dark:bg-brand-dark-gray rounded-xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-5 min-w-[130px]">
+                <View key={index} className="bg-brand-dark-gray rounded-xl border border-zinc-800/50 shadow-sm p-5 min-w-[130px]">
                   <Text className="text-slate-500 dark:text-slate-400 text-sm font-medium">{shift.day}</Text>
-                  <Text className="text-slate-800 dark:text-slate-50 font-bold mt-1 text-lg">{shift.time}</Text>
+                  <Text className="text-slate-50 font-bold mt-1 text-lg">{shift.time}</Text>
                 </View>
               ))}
             </ScrollView>

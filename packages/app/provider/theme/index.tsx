@@ -39,7 +39,12 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
             if (savedTheme) setThemeMode(savedTheme);
 
             const savedColor = localStorage.getItem('color_mode') as ColorMode | null;
-            if (savedColor) {
+            if (savedColor === 'light') {
+                // Force back to dark if it was light (addressing user request)
+                setColorMode('dark');
+                setColorScheme('dark');
+                localStorage.setItem('color_mode', 'dark');
+            } else if (savedColor) {
                 setColorMode(savedColor);
                 setColorScheme(savedColor);
             } else {
