@@ -17,7 +17,7 @@ import { MotiView } from 'moti'
 import { Plus } from 'lucide-react-native'
 
 // Custom Center Button Component
-function CustomTabBarButton({ children, onPress }: any) {
+const CustomTabBarButton = React.memo(({ children, onPress }: any) => {
   const { isFabOpen, toggleFab } = useFab()
 
   return (
@@ -62,7 +62,7 @@ function CustomTabBarButton({ children, onPress }: any) {
       </View>
     </TouchableOpacity>
   )
-}
+})
 
 // Dummy screen for placeholders
 function PlaceholderScreen({ route }: { route: any }) {
@@ -91,7 +91,7 @@ const Stack = createNativeStackNavigator<{
   payroll: undefined
 }>()
 
-function TabNavigator() {
+const TabNavigator = React.memo(function TabNavigator() {
   const { colorMode } = useTheme()
   const isDark = colorMode === 'dark'
 
@@ -99,7 +99,7 @@ function TabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: true,
-        headerStyle: { 
+        headerStyle: {
           backgroundColor: isDark ? '#0F0F0F' : '#ffffff',
           borderBottomWidth: 1,
           borderBottomColor: isDark ? '#27272a' : '#e5e7eb',
@@ -141,17 +141,10 @@ function TabNavigator() {
       <Tab.Screen
         name="quick"
         component={PlaceholderScreen}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault()
-          },
-        }}
         options={{
           tabBarLabel: '',
           tabBarIcon: () => null,
-          tabBarButton: (props) => (
-            <CustomTabBarButton {...props} />
-          )
+          tabBarButton: () => <CustomTabBarButton />
         }}
       />
       <Tab.Screen
@@ -172,7 +165,8 @@ function TabNavigator() {
       />
     </Tab.Navigator>
   )
-}
+})
+
 
 function FabOverlayWrapper() {
   const { isFabOpen, setFabOpen } = useFab()

@@ -31,23 +31,18 @@ const ACTION_ITEMS = [
   { id: 'helpdesk', label: 'Helpdesk', icon: MessageSquare, color: '#0FA3B1' },
 ]
 
-const ActionItem = React.memo(({ item, index, width, onPress }: any) => {
+const ActionItem = React.memo(({ item, index, width, onPress, isExit }: any) => {
   const itemWidth = (width - 48) / 3
 
   return (
     <MotiView
       from={{ opacity: 0, scale: 0.8, translateY: 15 }}
       animate={{ opacity: 1, scale: 1, translateY: 0 }}
-      exit={{ 
-        opacity: 0, 
-        scale: 0.8, 
-        translateY: 10,
-      }}
+      exit={{ opacity: 0, scale: 0.8, translateY: 10 }}
       transition={{
-        type: 'spring',
-        delay: index * 20,
-        damping: 20,
-        stiffness: 250,
+        type: 'timing',
+        duration: isExit ? 100 : 180,
+        delay: isExit ? 0 : index * 15,
       }}
       style={{ width: itemWidth }}
       className="items-center mb-6"
@@ -55,6 +50,7 @@ const ActionItem = React.memo(({ item, index, width, onPress }: any) => {
       <TouchableOpacity
         onPress={() => onPress(item.id)}
         className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-md mb-2"
+        activeOpacity={0.7}
         style={{
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
@@ -85,7 +81,6 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
 
   const handleItemPress = React.useCallback((id: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    console.log('Pressed item:', id)
     onClose()
   }, [onClose])
 
@@ -95,8 +90,7 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
     <AnimatePresence>
       {isOpen && (
         <View 
-          style={StyleSheet.absoluteFill} 
-          className="z-50"
+          style={[StyleSheet.absoluteFill, { zIndex: 999 }]} 
           pointerEvents={isOpen ? 'auto' : 'none'}
         >
           {/* Gaussian Blur / Dark Overlay */}
@@ -104,8 +98,9 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
             from={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 150 }}
+            transition={{ type: 'timing', duration: 150 }}
             style={StyleSheet.absoluteFill}
+            pointerEvents={isOpen ? 'auto' : 'none'}
           >
             {Platform.OS === 'ios' ? (
               <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill}>
@@ -121,8 +116,8 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
           </MotiView>
 
           {/* Action Grid */}
-          <View className="absolute inset-x-0 bottom-32 px-6">
-            <View className="flex-row flex-wrap justify-start">
+          <View className="absolute inset-x-0 bottom-32 px-6" pointerEvents="box-none">
+            <View className="flex-row flex-wrap justify-start" pointerEvents="box-none">
               {ACTION_ITEMS.map((item, index) => (
                 <ActionItem
                   key={item.id}
@@ -130,6 +125,7 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
                   index={index}
                   width={width}
                   onPress={handleItemPress}
+                  isExit={!isOpen}
                 />
               ))}
             </View>
