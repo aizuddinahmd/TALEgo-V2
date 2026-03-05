@@ -2,7 +2,7 @@ import * as React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { View, Text, TouchableOpacity } from 'react-native'
-import { Wallet, ShieldCheck, Scan, Compass, Radar, User, Home, Calendar } from 'lucide-react-native'
+import { Compass, User, Home, Calendar, Plus } from 'lucide-react-native'
 
 import { HomeScreen } from 'app/features/home/screen'
 import { UserDetailScreen } from 'app/features/user/detail-screen'
@@ -14,7 +14,6 @@ import { useTheme } from 'app/provider/theme'
 import { useFab } from 'app/provider/fab'
 import { FabOverlay } from '../../components/navigation/fab-overlay'
 import { MotiView } from 'moti'
-import { Plus } from 'lucide-react-native'
 
 // Custom Center Button Component
 const CustomTabBarButton = React.memo(({ children, onPress }: any) => {
