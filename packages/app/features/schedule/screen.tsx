@@ -10,6 +10,14 @@ if (Platform.OS === 'android') {
   }
 }
 
+// Helper to format date to YYYY-MM-DD in local time
+const formatDateISO = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 // Mock Data
 type Member = { id: string; name: string; avatar: string };
 
@@ -103,7 +111,7 @@ const generateWeekDates = (weekOffset = 0): { dayName: string; dayNumber: string
     dates.push({
       dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
       dayNumber: d.getDate().toString().padStart(2, '0'),
-      fullDate: d.toISOString().split('T')[0] ?? ''
+      fullDate: formatDateISO(d)
     });
   }
   return dates;
@@ -181,7 +189,7 @@ const MonthView = ({ selectedDate, onSelectDate, getShiftStatusForDate }: { sele
   // Current month days
   for (let i = 1; i <= daysInMonth; i++) {
     const d = new Date(currentYear, currentMonth, i);
-    dates.push(d.toISOString().split('T')[0]!);
+    dates.push(formatDateISO(d));
   }
 
   const dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -226,7 +234,7 @@ const MonthView = ({ selectedDate, onSelectDate, getShiftStatusForDate }: { sele
 
 export function ScheduleScreen() {
   const [weekOffset, setWeekOffset] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(formatDateISO(new Date()));
   const [isMonthView, setIsMonthView] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -356,7 +364,10 @@ export function ScheduleScreen() {
           <View className="flex-row items-center justify-between mb-4 px-2">
             <View>
               <Text className="text-xl font-bold text-slate-800 dark:text-white">
-                {new Date(selectedDate || '').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {(() => {
+                  const [y, m, d] = selectedDate.split('-').map(Number);
+                  return new Date(y!, m! - 1, d!).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                })()}
               </Text>
               <Text className="text-slate-500 dark:text-zinc-500 text-xs font-medium">Your Schedule Overview</Text>
             </View>
@@ -442,7 +453,11 @@ export function ScheduleScreen() {
         {/* Content Area - Shift Feed */}
         <View className="flex-1">
           <Text className="text-sm font-bold text-slate-800 dark:text-white mb-3">
-            Shifts for {hasMounted && selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric'}) : '...'}
+            Shifts for {(() => {
+              if (!hasMounted || !selectedDate) return '...';
+              const [y, m, d] = selectedDate.split('-').map(Number);
+              return new Date(y!, m! - 1, d!).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric'});
+            })()}
           </Text>
           
           {filteredShifts.length === 0 ? (
@@ -485,7 +500,12 @@ export function ScheduleScreen() {
                           
                           {/* Date & Time */}
                           <View className="flex-[1.5]">
-                            <Text className="text-sm font-bold text-slate-800 dark:text-white mb-0.5">{new Date(item.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'})}</Text>
+                            <Text className="text-sm font-bold text-slate-800 dark:text-white mb-0.5">
+                              {(() => {
+                                const [y, m, d] = item.date.split('-').map(Number);
+                                return new Date(y!, m! - 1, d!).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric'});
+                              })()}
+                            </Text>
                             {item.type !== 'leave' && (
                               <View className="flex-row items-center gap-1">
                                 <Clock size={12} className="text-slate-400" />
