@@ -7,6 +7,7 @@ const theme = {
   extend: {
     colors: {
       'brand-gold': '#D4AF37',
+      'brand-blue': '#0066FF',
       'brand-black': '#0F0F0F',
       'brand-dark-gray': '#1A1A1A',
       'glass-bg': 'rgba(20, 20, 20, 0.7)',

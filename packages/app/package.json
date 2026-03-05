@@ -9,6 +9,8 @@
     "@supabase/supabase-js": "^2.97.0",
     "clsx": "^2.1.1",
     "dripsy": "^4.3.3",
+    "expo-blur": "^55.0.8",
+    "expo-haptics": "^55.0.8",
     "expo-linear-gradient": "^55.0.8",
     "moti": "^0.30.0",
     "solito": "next",

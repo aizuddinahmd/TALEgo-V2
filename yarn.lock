@@ -3834,6 +3834,8 @@ __metadata:
     "@supabase/supabase-js": "npm:^2.97.0"
     clsx: "npm:^2.1.1"
     dripsy: "npm:^4.3.3"
+    expo-blur: "npm:^55.0.8"
+    expo-haptics: "npm:^55.0.8"
     expo-linear-gradient: "npm:^55.0.8"
     moti: "npm:^0.30.0"
     solito: "npm:next"
@@ -5869,6 +5871,8 @@ __metadata:
     app: "npm:*"
     babel-plugin-react-compiler: "npm:19.0.0-beta-3229e95-20250315"
     expo: "npm:^54.0.16"
+    expo-blur: "npm:~15.0.8"
+    expo-haptics: "npm:~15.0.8"
     expo-image: "npm:~3.0.10"
     expo-linear-gradient: "npm:~15.0.7"
     expo-linking: "npm:~8.0.8"
@@ -5898,6 +5902,28 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/5233f90e6cee7e04f6567778b111589cc80663ca5c22e08f5360ae9ec0a70e70dec7726fbd4a2733f1118ef327d8dc5119a09ae5d7c785a29601c072db8532d0
+  languageName: node
+  linkType: hard
+
+"expo-blur@npm:^55.0.8":
+  version: 55.0.8
+  resolution: "expo-blur@npm:55.0.8"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10/dcb267b82bca743311eaf6c0039da79d4e2ee1ed406e42deb6380b58b5e4d83c8f6abeeb31529ab9a7329ccfdf32944e5de47c6cedb097f6f483e7aa627760c0
+  languageName: node
+  linkType: hard
+
+"expo-blur@npm:~15.0.8":
+  version: 15.0.8
+  resolution: "expo-blur@npm:15.0.8"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10/1dfe001d5d796e05d2065a5528ee53793e1ec67bca6bf87372fdf43b01dcb622af32253466b9cac94ed7402e9436a021cf82f7e5b0f4d7eff997cf72f867dd92
   languageName: node
   linkType: hard
 
@@ -5934,6 +5960,24 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/29511a5ba7b8a2c37d7941d6d2908f9a07d7efbf227b507a85582fc9e24ac3eb9e119e0b8329e37835e8250ec10e65fe80076c4f81cac91904c718fd892386c5
+  languageName: node
+  linkType: hard
+
+"expo-haptics@npm:^55.0.8":
+  version: 55.0.8
+  resolution: "expo-haptics@npm:55.0.8"
+  peerDependencies:
+    expo: "*"
+  checksum: 10/3cf8851ccb3a40dfadd8534f275384b4047073f873a6edbb78a887b521c6f5aeddecb1f0fe61b72433eec9a7f4f613978cf6e804595e14e31354daf8bbcbef24
+  languageName: node
+  linkType: hard
+
+"expo-haptics@npm:~15.0.8":
+  version: 15.0.8
+  resolution: "expo-haptics@npm:15.0.8"
+  peerDependencies:
+    expo: "*"
+  checksum: 10/28d9703d0c56bed1afe903a589ef56c10a65d864370227fcfe6b4fe5a12423d82f534184b59f008083830538528637ff3680b22f286ed83e8edf6f1bfdafadc4
   languageName: node
   linkType: hard
 
