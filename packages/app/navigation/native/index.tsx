@@ -2,7 +2,7 @@ import * as React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { View, Text, TouchableOpacity } from 'react-native'
-import { Wallet, ShieldCheck, Scan, Compass, Radar, User, Home, Calendar } from 'lucide-react-native'
+import { Compass, User, Home, Calendar, Plus } from 'lucide-react-native'
 
 import { HomeScreen } from 'app/features/home/screen'
 import { UserDetailScreen } from 'app/features/user/detail-screen'
@@ -13,7 +13,7 @@ import { SignUpScreen } from 'app/features/auth/SignUp'
 import { useTheme } from 'app/provider/theme'
 
 // Custom Center Button Component
-function CustomTabBarButton({ children, onPress }: any) {
+function CustomTabBarButton({ onPress }: any) {
   return (
     <TouchableOpacity
       style={{
@@ -41,7 +41,7 @@ function CustomTabBarButton({ children, onPress }: any) {
           alignItems: 'center',
         }}
       >
-        {children}
+        <Plus color="#000" size={32} strokeWidth={3} />
       </View>
     </TouchableOpacity>
   )
@@ -126,9 +126,7 @@ function TabNavigator() {
         component={PlaceholderScreen}
         options={{
           tabBarLabel: '',
-          tabBarIcon: () => (
-            <Scan color="#000" size={32} strokeWidth={3} />
-          ),
+          tabBarShowLabel: false,
           tabBarButton: (props) => (
             <CustomTabBarButton {...props} />
           )
