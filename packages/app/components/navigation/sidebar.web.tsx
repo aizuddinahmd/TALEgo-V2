@@ -34,11 +34,11 @@ function NavItem({
   const [isOpen, setIsOpen] = useState(item.defaultOpen || false)
   const active = isActive(item.path)
   const hasChildren = item.children && item.children.length > 0
-  const isSelected = active || (hasChildren && item.children?.some(child => isActive(child.path)))
+  const isSelected = active || (hasChildren && item.children?.some((child: any) => isActive(child.path)))
 
   // Auto-expand if a child is active
   useEffect(() => {
-    if (hasChildren && item.children?.some(child => isActive(child.path))) {
+    if (hasChildren && item.children?.some((child: any) => isActive(child.path))) {
       setIsOpen(true)
     }
   }, [pathname, hasChildren, item.children])
@@ -93,7 +93,7 @@ function NavItem({
               transition={{ duration: 0.2, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              {item.children?.map((child) => (
+              {item.children?.map((child: any) => (
                 <NavItem 
                   key={child.id} 
                   item={child} 

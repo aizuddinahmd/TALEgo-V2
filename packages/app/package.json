@@ -12,6 +12,7 @@
     "expo-blur": "^55.0.8",
     "expo-haptics": "^55.0.8",
     "expo-linear-gradient": "^55.0.8",
+    "expo-linking": "^55.0.7",
     "moti": "^0.30.0",
     "solito": "next",
     "tailwind-merge": "^3.5.0"
