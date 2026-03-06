@@ -36,6 +36,8 @@
     "app-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "../../packages/app/**/*.ts",
+    "../../packages/app/**/*.tsx",
     "next.config.js",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"

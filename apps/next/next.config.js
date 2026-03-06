@@ -80,6 +80,7 @@ const nextConfig = {
     'lucide-react-native',
     'react-native-svg',
     'expo-linear-gradient',
+    'app',
   ],
 
   compiler: {

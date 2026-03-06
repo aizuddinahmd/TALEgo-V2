@@ -16,5 +16,8 @@
     "solito": "next",
     "tailwind-merge": "^3.5.0"
   },
+  "devDependencies": {
+    "next": "^16.1.0"
+  },
   "sideEffects": false
 }
