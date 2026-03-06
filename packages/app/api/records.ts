@@ -54,13 +54,12 @@ export const fetchExpenseRecords = async (staffId: string) => {
   return data || []
 }
 
-export const fetchAttendanceRecords = async () => {
-  const { data, error } = await supabase.functions.invoke('attendance-my-attendance', {
-    method: 'GET'
-  })
+import { fetchMyAttendance } from './attendance'
 
-  if (error) throw error
-  return data?.logs || []
+export const fetchAttendanceRecords = async () => {
+  const data = await fetchMyAttendance()
+  const logs = data?.logs || []
+  return logs
 }
 
 export const fetchLeaveBalances = async (staffId: string) => {

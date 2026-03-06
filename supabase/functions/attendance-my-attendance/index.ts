@@ -13,9 +13,20 @@ Deno.serve(async (req) => {
     const staffProfile = await getStaffProfile(supabase, user.id)
 
     const url = new URL(req.url)
-    const startDate = url.searchParams.get('start_date')
-    const endDate = url.searchParams.get('end_date')
-    const limit = parseInt(url.searchParams.get('limit') || '50')
+    let startDate = url.searchParams.get('start_date')
+    let endDate = url.searchParams.get('end_date')
+    let limit = parseInt(url.searchParams.get('limit') || '50')
+
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json()
+        if (body.start_date) startDate = body.start_date
+        if (body.end_date) endDate = body.end_date
+        if (body.limit) limit = body.limit
+      } catch (e) {
+        // Ignore JSON parse errors
+      }
+    }
 
     let query = supabase
       .from('attendance_logs')

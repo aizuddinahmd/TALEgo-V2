@@ -63,7 +63,9 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
       } else if (activeTab === 'expenses' || activeTab === 'claims') {
         rawData = await fetchExpenseRecords(staffId!)
       } else if (activeTab === 'attendance') {
+        console.log('DEBUG: MyRecordScreen loading attendance data');
         rawData = await fetchAttendanceRecords()
+        console.log('DEBUG: MyRecordScreen rawData received for attendance:', rawData);
       }
       setRecords(rawData)
     } catch (err) {
