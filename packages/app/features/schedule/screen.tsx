@@ -90,18 +90,17 @@ const SHIFTS_MOCK: Shift[] = [
 ];
 
 // Helper to generate dates starting from a specific week's Monday
-const generateWeekDates = (weekOffset = 0): { dayName: string; dayNumber: string; fullDate: string }[] => {
+const generateWeekDates = (baseDate: Date, weekOffset = 0): { dayName: string; dayNumber: string; fullDate: string }[] => {
   const dates: { dayName: string; dayNumber: string; fullDate: string }[] = [];
-  const today = new Date();
   
-  // Get current day of week (0-6, 0 is Sunday)
-  const day = today.getDay();
+  // Get day of week (0-6, 0 is Sunday)
+  const day = baseDate.getDay();
   // Calculate distance to previous Monday (1)
   // If it's Sunday (0), we need to go back 6 days.
-  const diff = today.getDate() - day + (day === 0 ? -6 : 1) + (weekOffset * 7);
+  const diff = baseDate.getDate() - day + (day === 0 ? -6 : 1) + (weekOffset * 7);
   
   // Create a new date object for Monday of the offset week
-  const startDay = new Date(today.getFullYear(), today.getMonth(), diff);
+  const startDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), diff);
   
   // Generate 14 days starting from that Monday
   for (let i = 0; i < 14; i++) {
@@ -169,11 +168,10 @@ const TeamPulse = ({ team }: { team?: Member[] }) => {
   );
 };
 
-const MonthView = ({ selectedDate, onSelectDate, getShiftStatusForDate }: { selectedDate: string, onSelectDate: (d: string) => void, getShiftStatusForDate: (d: string) => string | null }) => {
+const MonthView = ({ selectedDate, onSelectDate, getShiftStatusForDate, viewDate }: { selectedDate: string, onSelectDate: (d: string) => void, getShiftStatusForDate: (d: string) => string | null, viewDate: Date }) => {
   const dates: (string | null)[] = [];
-  const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
+  const currentMonth = viewDate.getMonth();
+  const currentYear = viewDate.getFullYear();
   
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -233,6 +231,7 @@ const MonthView = ({ selectedDate, onSelectDate, getShiftStatusForDate }: { sele
 };
 
 export function ScheduleScreen() {
+  const [viewDate, setViewDate] = useState(new Date());
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState(formatDateISO(new Date()));
   const [isMonthView, setIsMonthView] = useState(false);
@@ -242,12 +241,38 @@ export function ScheduleScreen() {
     setHasMounted(true);
   }, []);
 
+  const navigatePrev = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (isMonthView) {
+      setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
+    } else {
+      setWeekOffset(prev => prev - 1);
+    }
+  };
+
+  const navigateNext = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (isMonthView) {
+      setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
+    } else {
+      setWeekOffset(prev => prev + 1);
+    }
+  };
+
+  const jumpToToday = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+    const today = new Date();
+    setViewDate(today);
+    setSelectedDate(formatDateISO(today));
+    setWeekOffset(0);
+  };
+
   const toggleCalendarView = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setIsMonthView(!isMonthView);
   };
 
-  const weekDates = generateWeekDates(weekOffset);
+  const weekDates = generateWeekDates(viewDate, weekOffset);
   const filteredShifts = SHIFTS_MOCK.filter(shift => shift.date === selectedDate);
   const totalHoursThisWeek = '32h'; // Mocked aggregation
 
@@ -362,16 +387,41 @@ export function ScheduleScreen() {
         {/* Interactive Calendar Header */}
         <View className="bg-white dark:bg-zinc-900 rounded-3xl p-4 border border-slate-200 dark:border-zinc-800 shadow-sm mb-6">
           <View className="flex-row items-center justify-between mb-4 px-2">
-            <View>
-              <Text className="text-xl font-bold text-slate-800 dark:text-white">
-                {(() => {
-                  const [y, m, d] = selectedDate.split('-').map(Number);
-                  return new Date(y!, m! - 1, d!).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                })()}
-              </Text>
-              <Text className="text-slate-500 dark:text-zinc-500 text-xs font-medium">Your Schedule Overview</Text>
+            <View className="flex-row items-center gap-3">
+              <TouchableOpacity 
+                onPress={navigatePrev}
+                className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700"
+              >
+                <ChevronLeft size={16} className="text-slate-600 dark:text-zinc-400" />
+              </TouchableOpacity>
+              
+              <View>
+                <Text className="text-xl font-bold text-slate-800 dark:text-white">
+                  {isMonthView 
+                    ? viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                    : (() => {
+                        const [y, m, d] = selectedDate.split('-').map(Number)
+                        return new Date(y!, m! - 1, d!).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                      })()
+                  }
+                </Text>
+                <Text className="text-slate-500 dark:text-zinc-500 text-xs font-medium">Your Schedule Overview</Text>
+              </View>
+
+              <TouchableOpacity 
+                onPress={navigateNext}
+                className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700"
+              >
+                <ChevronRight size={16} className="text-slate-600 dark:text-zinc-400" />
+              </TouchableOpacity>
             </View>
             <View className="flex-row items-center gap-2">
+              <TouchableOpacity 
+                onPress={jumpToToday}
+                className="px-3 py-2 bg-brand-gold/10 rounded-xl border border-brand-gold/20 mr-1"
+              >
+                <Text className="text-[10px] font-bold text-brand-gold uppercase">Today</Text>
+              </TouchableOpacity>
               <TouchableOpacity className="p-2 bg-slate-100 dark:bg-zinc-800 rounded-xl border border-slate-200 dark:border-zinc-700">
                 <CalendarPlus size={18} className="text-slate-600 dark:text-zinc-400" />
               </TouchableOpacity>
@@ -393,6 +443,7 @@ export function ScheduleScreen() {
               selectedDate={selectedDate} 
               onSelectDate={setSelectedDate} 
               getShiftStatusForDate={(d) => getShiftStatusForDate(d) || null}
+              viewDate={viewDate}
             />
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 pb-2">

@@ -1,7 +1,7 @@
 // packages/app/features/overview/employee-overview.tsx
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert, Dimensions } from 'react-native';
-import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Activity, LogOut, ChevronRight } from 'lucide-react-native';
+import { Bell, MapPin, Clock, Calendar, CheckCircle, AlertCircle, FileText, Activity, LogOut, ChevronRight, Send, Wallet } from 'lucide-react-native';
 import { Svg, Circle, G, Text as SvgText } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { clockIn, clockOut, getTodayAttendance } from '../../api/attendance';
@@ -89,11 +89,44 @@ export function EmployeeOverview() {
   const [todayShift, setTodayShift] = useState<any>(null);
   const [leaveBalances, setLeaveBalances] = useState<any[]>([]);
   const [staffInfo, setStaffInfo] = useState<any>(null);
+  const [nextShift, setNextShift] = useState<any>(null);
 
-  console.log('DEBUG: EmployeeOverview component scope. initialLoading:', initialLoading);
+  const isRestMode = attendanceStatus === 'on_leave' || !todayShift;
 
   const [currentDate, setCurrentDate] = useState('');
   const [currentTime, setCurrentTime] = useState('');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // Helper to format seconds to HH:MM:SS
+  const formatElapsed = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return [hours, minutes, seconds]
+      .map(v => v < 10 ? '0' + v : v)
+      .join(':');
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (attendanceStatus === 'active' && todayLog?.checkin_time) {
+      const checkinTime = new Date(todayLog.checkin_time).getTime();
+      
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const diff = Math.floor((now - checkinTime) / 1000);
+        setElapsedSeconds(diff >= 0 ? diff : 0);
+      };
+
+      updateTimer();
+      interval = setInterval(updateTimer, 1000);
+    } else {
+      setElapsedSeconds(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [attendanceStatus, todayLog]);
 
   useEffect(() => {
     setCurrentDate(new Date().toLocaleDateString('en-US', {
@@ -131,6 +164,13 @@ export function EmployeeOverview() {
       setAttendanceStatus(data.status);
       setTodayLog(data.log);
       setTodayShift(data.shift);
+
+      // Mocking next shift info for "Rest Mode" demonstration
+      // In a real app, this would be fetched from an API like getNextShift()
+      setNextShift({
+        date: 'Tomorrow',
+        time: '09:00 AM'
+      });
 
       // Fetch Staff Profile and Leave Balances
       const profile = await getStaffProfile();
@@ -203,38 +243,118 @@ export function EmployeeOverview() {
         {/* Header */}
         <View className="mb-6">
           {/* <Text className="text-slate-500 dark:text-brand-gold font-medium text-lg mb-1">TALEgo Dashboard</Text> */}
-          <Text className="text-2xl font-bold text-brand-gold">Employee Overview</Text>
+          <Text className="text-2xl font-bold text-brand-gold">Hi, {staffInfo?.full_name}</Text>
         </View>
 
         {/* Top Section */}
         <View className="flex-col lg:flex-row gap-4 mb-8">
-          {/* Clock Card */}
+          {/* Clock Card / Rest Mode Card */}
           <LinearGradient
-            colors={['#1c1c16', '#111111']}
+            colors={isRestMode 
+              ? ['#2c3e50', '#1a2a3a'] // Softer Navy/Slate for Rest Mode
+              : ['#1c1c16', '#111111'] // Dark for Active/Tracking
+            }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 12, padding: 24, flex: 1, borderWidth: 1, borderColor: 'rgba(212, 175, 55, 0.1)' }}
+            style={{ 
+              borderRadius: 12, 
+              padding: 24, 
+              flex: 1, 
+              borderWidth: 1, 
+              borderColor: isRestMode ? 'rgba(56, 189, 248, 0.1)' : 'rgba(212, 175, 55, 0.1)' 
+            }}
           >
-            <View className="flex-row items-center justify-between mb-6">
-              <View>
-                <Text className="text-slate-500 dark:text-slate-400 font-medium">{currentDate}</Text>
-                <View className="flex-row items-baseline gap-2">
-                  <Text className="text-4xl font-bold text-slate-50 mt-1">{currentTime}</Text>
+            {isRestMode ? (
+              <View className="mb-8">
+                <View className="flex-row items-center gap-2 mb-4">
+                  <View className="w-10 h-10 bg-sky-500/20 rounded-full items-center justify-center">
+                    <Calendar className="text-sky-400" size={20} />
+                  </View>
+                  <Text className="text-sky-400 font-medium text-sm">{currentDate}</Text>
                 </View>
-                {todayLog && (
-                   <Text className="text-zinc-500 text-xs mt-2">
-                     {attendanceStatus === 'active' ? `In: ${new Date(todayLog.checkin_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 
-                      `Work session completed`}
-                   </Text>
-                )}
+
+                <Text className="text-3xl font-bold text-white mb-2">
+                  {attendanceStatus === 'on_leave' 
+                    ? `Enjoy your Leave, ${staffInfo?.full_name?.split(' ')[0] || 'Aisha'}!` 
+                    : `Enjoy your Day Off, ${staffInfo?.full_name?.split(' ')[0] || 'Aisha'}!`}
+                </Text>
+                
+                <View className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                  <Text className="text-slate-400 text-xs mb-1 uppercase tracking-wider font-bold">Next Up</Text>
+                  <Text className="text-slate-200 text-sm font-medium">
+                    Your next shift starts <Text className="text-sky-400">{nextShift?.date || 'Tomorrow'}</Text> at <Text className="text-sky-400">{nextShift?.time || '09:00 AM'}</Text>.
+                  </Text>
+                </View>
               </View>
-              <View className="w-12 h-12 bg-blue-100 dark:bg-brand-gold/20 rounded-full items-center justify-center">
-                <Clock className="text-blue-600 dark:text-brand-gold" size={24} />
-              </View>
-            </View>
+            ) : (
+              <>
+                <View className="mb-4">
+                  <View className="flex-row items-center gap-2 mb-1">
+                    <Calendar size={14} className="text-slate-400" />
+                    <Text className="text-slate-400 font-medium text-sm">{currentDate} (today)</Text>
+                  </View>
+                  <Text className="text-slate-500 text-xs">Working office hour (08:00 - 17:00)</Text>
+                </View>
+
+                <View className="flex-row justify-between items-end mb-6">
+                  <View className="flex-1">
+                    <Text className="text-slate-500 text-xs mb-1">Start time</Text>
+                    <Text className="text-2xl font-bold text-slate-50">
+                      {todayLog?.checkin_time 
+                        ? new Date(todayLog.checkin_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                        : '00:00'}
+                    </Text>
+                  </View>
+
+                  {attendanceStatus === 'active' && (
+                    <View className="items-center px-4">
+                      <Text className="text-brand-gold font-bold text-lg mb-1">{formatElapsed(elapsedSeconds)}</Text>
+                    </View>
+                  )}
+
+                  <View className="flex-1 items-end">
+                    <Text className="text-slate-500 text-xs mb-1">End time</Text>
+                    <Text className="text-2xl font-bold text-slate-50">
+                      {todayLog?.checkout_time 
+                        ? new Date(todayLog.checkout_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+                        : '--:--'}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Progress Bar */}
+                <View className="w-full h-1.5 bg-zinc-800 rounded-full mb-8 overflow-hidden">
+                  <View 
+                    className="h-full bg-brand-gold rounded-full" 
+                    style={{ 
+                      width: attendanceStatus === 'active' 
+                        ? `${Math.min((elapsedSeconds / (9 * 3600)) * 100, 100)}%` 
+                        : attendanceStatus === 'completed' ? '100%' : '0%' 
+                    }} 
+                  />
+                </View>
+              </>
+            )}
             
             <View className="flex-row items-center gap-4">
-              {attendanceStatus === 'completed' ? (
+              {isRestMode ? (
+                <>
+                  <TouchableOpacity 
+                    className="flex-1 bg-white/10 border border-white/10 rounded-lg py-4 flex-row items-center justify-center gap-2 active:opacity-80"
+                    onPress={() => console.log('Apply Leave')}
+                  >
+                    <Send color="white" size={18} />
+                    <Text className="text-white font-bold text-base">Apply Leave</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    className="flex-1 bg-sky-500/10 border border-sky-500/20 rounded-lg py-4 flex-row items-center justify-center gap-2 active:opacity-80"
+                    onPress={() => console.log('Check Payslip')}
+                  >
+                    <Wallet color="#38BDF8" size={18} />
+                    <Text className="text-sky-400 font-bold text-base">Check Payslip</Text>
+                  </TouchableOpacity>
+                </>
+              ) : attendanceStatus === 'completed' ? (
                 <View className="flex-1 bg-green-500/10 border border-green-500/20 rounded-lg py-4 items-center justify-center flex-row gap-2">
                    <CheckCircle color="#22C55E" size={20} />
                    <Text className="text-green-500 font-bold text-base">Shift Completed</Text>
@@ -248,7 +368,7 @@ export function EmployeeOverview() {
                 <TouchableOpacity 
                   disabled={loading}
                   onPress={handleClockAction}
-                  className={`flex-1 ${attendanceStatus === 'active' ? 'bg-red-500' : 'bg-blue-600 dark:bg-brand-gold'} rounded-lg py-4 flex-row items-center justify-center gap-2 active:opacity-80`}
+                  className={`flex-1 ${attendanceStatus === 'active' ? 'bg-zinc-800 border border-zinc-700' : 'bg-blue-600 dark:bg-brand-gold'} rounded-lg py-4 flex-row items-center justify-center gap-2 active:opacity-80`}
                 >
                   {loading ? (
                     <ActivityIndicator size="small" color={attendanceStatus === 'active' ? 'white' : 'black'} />
@@ -263,6 +383,15 @@ export function EmployeeOverview() {
                 </TouchableOpacity>
               )}
             </View>
+
+            {attendanceStatus === 'active' && (
+              <View className="mt-6 flex-row items-center gap-2">
+                <Text className="text-lg">🔥</Text>
+                <Text className="text-slate-300 text-sm">
+                  You are <Text className="text-brand-gold font-bold">on fire</Text> since morning. Keep rocking!
+                </Text>
+              </View>
+            )}
           </LinearGradient>
 
           {/* Leave Balances Widget */}
