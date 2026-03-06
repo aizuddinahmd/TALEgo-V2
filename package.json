@@ -17,7 +17,8 @@
   },
   "scripts": {
     "native": "cd apps/expo && yarn start",
-    "web": "cd apps/next && yarn dev"
+    "web": "cd apps/next && yarn dev",
+    "build": "turbo build"
   },
   "packageManager": "yarn@4.7.0",
   "eslintConfig": {
@@ -36,12 +37,18 @@
     "singleQuote": true
   },
   "dependencies": {
+    "@babel/core": "^7.24.0",
     "@react-navigation/bottom-tabs": "^7.14.0",
+    "@react-navigation/native": "^7.0.15",
     "framer-motion": "^12.34.3",
     "lucide-react": "^0.575.0",
     "lucide-react-native": "^0.575.0",
     "nativewind": "^4.1.23",
+    "react": "19.2.0",
+    "react-native": "0.81.4",
     "react-native-reanimated": "^4.2.2",
+    "react-native-safe-area-context": "^5.6.0",
+    "react-native-screens": "^4.16.0",
     "react-native-svg": "^15.15.3",
     "react-native-worklets": "^0.7.4"
   }

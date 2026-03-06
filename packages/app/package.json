@@ -16,6 +16,15 @@
     "solito": "next",
     "tailwind-merge": "^3.5.0"
   },
+  "peerDependencies": {
+    "expo": ">=54.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "react-native": ">=0.70.0",
+    "react-native-reanimated": ">=3.0.0",
+    "react-native-safe-area-context": ">=4.0.0",
+    "react-native-screens": ">=3.0.0"
+  },
   "devDependencies": {
     "next": "^16.1.0"
   },
