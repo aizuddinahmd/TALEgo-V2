@@ -18,6 +18,10 @@ const withWebpack = {
         'react-native-web/dist/vendor/react-native/emitter/EventEmitter',
       'react-native/Libraries/EventEmitter/NativeEventEmitter$':
         'react-native-web/dist/vendor/react-native/NativeEventEmitter',
+      'react-native/Libraries/Utilities/codegenNativeComponent': path.resolve(
+        __dirname,
+        'shims/codegenNativeComponent.js'
+      ),
     }
 
     config.resolve.extensions = [
@@ -45,6 +49,10 @@ const withTurpopack = {
         'react-native-web/dist/vendor/react-native/emitter/EventEmitter',
       'react-native/Libraries/EventEmitter/NativeEventEmitter$':
         'react-native-web/dist/vendor/react-native/NativeEventEmitter',
+      'react-native/Libraries/Utilities/codegenNativeComponent': path.resolve(
+        __dirname,
+        'shims/codegenNativeComponent.js'
+      ),
     },
     resolveExtensions: [
       '.web.js',
@@ -81,6 +89,8 @@ const nextConfig = {
     'react-native-svg',
     'expo-linear-gradient',
     'app',
+    'react-native-safe-area-context',
+    'react-native-screens',
   ],
 
   compiler: {
