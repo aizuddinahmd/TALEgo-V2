@@ -250,10 +250,7 @@ export function EmployeeOverview() {
         <View className="flex-col lg:flex-row gap-4 mb-8">
           {/* Clock Card / Rest Mode Card */}
           <LinearGradient
-            colors={isRestMode 
-              ? ['#2c3e50', '#1a2a3a'] // Softer Navy/Slate for Rest Mode
-              : ['#1c1c16', '#111111'] // Dark for Active/Tracking
-            }
+            colors={['#1c1c16', '#111111']} // Unified Premium Dark Gradient
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{ 
@@ -261,7 +258,7 @@ export function EmployeeOverview() {
               padding: 24, 
               flex: 1, 
               borderWidth: 1, 
-              borderColor: isRestMode ? 'rgba(56, 189, 248, 0.1)' : 'rgba(212, 175, 55, 0.1)' 
+              borderColor: 'rgba(212, 175, 55, 0.1)' 
             }}
           >
             {isRestMode ? (
@@ -273,10 +270,10 @@ export function EmployeeOverview() {
                   <Text className="text-sky-400 font-medium text-sm">{currentDate}</Text>
                 </View>
 
-                <Text className="text-3xl font-bold text-white mb-2">
+                <Text className="text-2xl font-bold text-white mb-2">
                   {attendanceStatus === 'on_leave' 
-                    ? `Enjoy your Leave, ${staffInfo?.full_name?.split(' ')[0] || 'Aisha'}!` 
-                    : `Enjoy your Day Off, ${staffInfo?.full_name?.split(' ')[0] || 'Aisha'}!`}
+                    ? `Enjoy your Leave`  
+                    : `Enjoy your Day Off`}
                 </Text>
                 
                 <View className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
@@ -338,31 +335,45 @@ export function EmployeeOverview() {
             
             <View className="flex-row items-center gap-4">
               {isRestMode ? (
-                <>
-                  <TouchableOpacity 
-                    className="flex-1 bg-white/10 border border-white/10 rounded-lg py-4 flex-row items-center justify-center gap-2 active:opacity-80"
-                    onPress={() => console.log('Apply Leave')}
-                  >
-                    <Send color="white" size={18} />
-                    <Text className="text-white font-bold text-base">Apply Leave</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    className="flex-1 bg-sky-500/10 border border-sky-500/20 rounded-lg py-4 flex-row items-center justify-center gap-2 active:opacity-80"
-                    onPress={() => console.log('Check Payslip')}
-                  >
-                    <Wallet color="#38BDF8" size={18} />
-                    <Text className="text-sky-400 font-bold text-base">Check Payslip</Text>
-                  </TouchableOpacity>
-                </>
+                attendanceStatus === 'on_leave' ? (
+                  <View className="flex-1 bg-blue-500/10 border border-blue-500/20 rounded-lg py-4 items-center justify-center flex-row gap-2">
+                     <Calendar color="#D4AF37" size={20} />
+                     <Text className="text-black font-bold text-base">On Approved Leave</Text>
+                  </View>
+                ) : (
+                  <>
+                    <TouchableOpacity 
+                      className="flex-1 bg-brand-gold rounded-xl py-4 items-center justify-center active:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+                      style={{
+                        shadowColor: '#D4AF37',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.5,
+                        shadowRadius: 12,
+                        elevation: 10,
+                      }}
+                      onPress={() => console.log('Apply Leave')}
+                    >
+                      <Text className="text-brand-black font-bold text-base uppercase tracking-tight">Apply Leave</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      className="flex-1 bg-brand-gold rounded-xl py-4 items-center justify-center active:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+                      style={{
+                        shadowColor: '#D4AF37',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.5,
+                        shadowRadius: 12,
+                        elevation: 10,
+                      }}
+                      onPress={() => console.log('Check Payslip')}
+                    >
+                      <Text className="text-brand-black font-bold text-base uppercase tracking-tight">Check Payslip</Text>
+                    </TouchableOpacity>
+                  </>
+                )
               ) : attendanceStatus === 'completed' ? (
                 <View className="flex-1 bg-green-500/10 border border-green-500/20 rounded-lg py-4 items-center justify-center flex-row gap-2">
                    <CheckCircle color="#22C55E" size={20} />
                    <Text className="text-green-500 font-bold text-base">Shift Completed</Text>
-                </View>
-              ) : attendanceStatus === 'on_leave' ? (
-                <View className="flex-1 bg-blue-500/10 border border-blue-500/20 rounded-lg py-4 items-center justify-center flex-row gap-2">
-                   <Calendar color="#3B82F6" size={20} />
-                   <Text className="text-blue-500 font-bold text-base">On Approved Leave</Text>
                 </View>
               ) : (
                 <TouchableOpacity 
