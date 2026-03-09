@@ -353,7 +353,7 @@ export function EmployeeOverview() {
                       }}
                       onPress={() => console.log('Apply Leave')}
                     >
-                      <Text className="text-brand-black font-bold text-base uppercase tracking-tight">Apply Leave</Text>
+                      <Text className="text-brand-black font-bold text-xs uppercase tracking-tight">Apply Leave</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                       className="flex-1 bg-brand-gold rounded-xl py-4 items-center justify-center active:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.4)]"
@@ -366,7 +366,7 @@ export function EmployeeOverview() {
                       }}
                       onPress={() => console.log('Check Payslip')}
                     >
-                      <Text className="text-brand-black font-bold text-base uppercase tracking-tight">Check Payslip</Text>
+                      <Text className="text-brand-black font-bold text-xs uppercase tracking-tight">Check Payslip</Text>
                     </TouchableOpacity>
                   </>
                 )
@@ -386,7 +386,7 @@ export function EmployeeOverview() {
                   ) : (
                     <>
                       {attendanceStatus === 'active' ? <LogOut color="white" size={20} /> : <MapPin color="black" size={20} />}
-                      <Text className={`${attendanceStatus === 'active' ? 'text-white' : 'text-black'} font-bold text-base`}>
+                      <Text className={`${attendanceStatus === 'active' ? 'text-white' : 'text-black'} font-bold text-sm`}>
                         {attendanceStatus === 'active' ? 'Clock Out' : 'Clock In'}
                       </Text>
                     </>
@@ -439,7 +439,7 @@ export function EmployeeOverview() {
                 elevation: 10, // Some standard shadow for android
               }}
             >
-              <Text className="text-brand-black font-bold text-base uppercase tracking-tight">Request leave</Text>
+              <Text className="text-brand-black font-bold text-sm uppercase tracking-tight">Request leave</Text>
             </TouchableOpacity>
           </View>
         </View>
