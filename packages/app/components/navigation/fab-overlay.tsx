@@ -12,8 +12,8 @@ import {
   FileCheck, 
   MessageSquare 
 } from 'lucide-react-native'
-import { BlurView } from 'expo-blur'
-import * as Haptics from 'expo-haptics'
+// import { BlurView } from 'expo-blur'
+// import * as Haptics from 'expo-haptics'
 
 interface FabOverlayProps {
   isOpen: boolean
@@ -67,13 +67,25 @@ const ActionItem = React.memo(({ item, index, width, onPress, isExit }: any) => 
 export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
   
   useEffect(() => {
-    if (isOpen) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    if (isOpen && Platform.OS !== 'web') {
+      try {
+        const Haptics = require('expo-haptics')
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      } catch (e) {
+        console.warn('Haptics not available', e)
+      }
     }
   }, [isOpen])
 
   const handleItemPress = React.useCallback((id: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    if (Platform.OS !== 'web') {
+      try {
+        const Haptics = require('expo-haptics')
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+      } catch (e) {
+        // ignore
+      }
+    }
     onClose()
   }, [onClose])
 
@@ -95,9 +107,14 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
             style={StyleSheet.absoluteFill}
           >
             {Platform.OS === 'ios' ? (
-              <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill}>
-                <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
-              </BlurView>
+              (() => {
+                const { BlurView } = require('expo-blur')
+                return (
+                  <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill}>
+                    <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
+                  </BlurView>
+                )
+              })()
             ) : (
               <Pressable 
                 onPress={onClose} 

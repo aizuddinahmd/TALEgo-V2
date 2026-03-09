@@ -270,7 +270,7 @@ export function EmployeeOverview() {
                   <Text className="text-sky-400 font-medium text-sm">{currentDate}</Text>
                 </View>
 
-                <Text className="text-2xl font-bold text-white mb-2">
+                <Text className="text-xl font-bold text-white mb-2">
                   {attendanceStatus === 'on_leave' 
                     ? `Enjoy your Leave`  
                     : `Enjoy your Day Off`}

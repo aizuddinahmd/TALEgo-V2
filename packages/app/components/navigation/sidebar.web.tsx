@@ -241,7 +241,7 @@ export function Sidebar() {
       initial={{ x: -20, opacity: 0 }} 
       animate={{ x: 0, opacity: 1 }} 
       transition={{ duration: 0.5 }} 
-      className="w-64 h-full bg-white/90 dark:bg-zinc-900/80 backdrop-blur-xl border-r border-black/10 dark:border-white/10 flex flex-col relative z-20 shrink-0"
+      className="hidden lg:flex w-64 h-full bg-white/90 dark:bg-zinc-900/80 backdrop-blur-xl border-r border-black/10 dark:border-white/10 flex flex-col relative z-20 shrink-0"
     >
       <div className="p-6 flex items-center gap-2">
           <div className="w-8 h-8 bg-brand-gold rounded-md mr-2 flex items-center justify-center">
