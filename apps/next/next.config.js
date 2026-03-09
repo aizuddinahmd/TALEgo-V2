@@ -88,8 +88,6 @@ const nextConfig = {
     'lucide-react-native',
     'react-native-svg',
     'expo-linear-gradient',
-    'expo-blur',
-    'expo-haptics',
     'app',
     'react-native-safe-area-context',
     'react-native-screens',

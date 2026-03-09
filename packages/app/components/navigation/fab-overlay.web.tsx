@@ -12,8 +12,8 @@ import {
   FileCheck, 
   MessageSquare 
 } from 'lucide-react-native'
-import { BlurView } from 'expo-blur'
-import * as Haptics from 'expo-haptics'
+
+// Note: No expo-blur or expo-haptics imports here for web
 
 interface FabOverlayProps {
   isOpen: boolean
@@ -68,12 +68,12 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
   
   useEffect(() => {
     if (isOpen) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      // No haptics on web for now, or use web haptics API if needed
     }
   }, [isOpen])
 
   const handleItemPress = React.useCallback((id: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+    // No haptics on web
     onClose()
   }, [onClose])
 
@@ -84,7 +84,7 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
       {isOpen && (
         <View 
           style={[StyleSheet.absoluteFill, { zIndex: 999 }]} 
-          pointerEvents="auto" // Always auto when mounted
+          pointerEvents="auto"
         >
           {/* Gaussian Blur / Dark Overlay */}
           <MotiView
@@ -94,17 +94,11 @@ export function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
             transition={{ type: 'timing', duration: 100 }}
             style={StyleSheet.absoluteFill}
           >
-            {Platform.OS === 'ios' ? (
-              <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill}>
-                <Pressable onPress={onClose} style={StyleSheet.absoluteFill} />
-              </BlurView>
-            ) : (
-              <Pressable 
-                onPress={onClose} 
-                className="flex-1 bg-white/80 backdrop-blur-md" 
-                style={StyleSheet.absoluteFill} 
-              />
-            )}
+            <Pressable 
+              onPress={onClose} 
+              className="flex-1 bg-white/80 backdrop-blur-md" 
+              style={StyleSheet.absoluteFill} 
+            />
           </MotiView>
 
           {/* Action Grid */}
