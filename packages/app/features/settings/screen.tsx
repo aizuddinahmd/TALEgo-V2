@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { View, Text, TouchableOpacity, ScrollView, TextInput, Switch } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Switch } from 'react-native'
 import { SettingsLayout } from './layout'
-import { 
+  import { 
   User, 
   Mail, 
   Phone, 
@@ -12,12 +12,35 @@ import {
   Globe, 
   LogOut,
   ChevronRight,
-  Plus
+  Plus,
+  Bell,
+  Moon,
+  Sun,
+  FileText,
+  FileBadge,
+  Receipt,
+  Camera,
+  HelpCircle,
+  Lock
 } from 'lucide-react-native'
 import { DocumentVault } from './document-vault'
+import { useTheme } from 'app/provider/theme'
+import { Dimensions, Platform, SafeAreaView } from 'react-native'
+import { signOut } from 'app/api/auth'
+import { useRouter } from 'solito/navigation'
 
 export function SettingsScreen() {
   const [activeSection, setActiveSection] = useState('account')
+  const [showMobileDetail, setShowMobileDetail] = useState(false)
+  const { width } = Dimensions.get('window')
+  const isWeb = Platform.OS === 'web'
+  const isLargeScreen = width >= 1024
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await signOut()
+    router.push('/login')
+  }
 
   const renderContent = () => {
     switch (activeSection) {
@@ -42,18 +65,223 @@ export function SettingsScreen() {
     }
   }
 
+  if (isWeb && isLargeScreen) {
+    return (
+      <SettingsLayout activeSection={activeSection} onSectionChange={setActiveSection}>
+        <View className="mb-10">
+          <Text className="text-3xl font-bold text-zinc-900 dark:text-white capitalize">
+            {activeSection.replace('-', ' ')}
+          </Text>
+          <Text className="text-zinc-500 mt-2">
+            Manage your {activeSection} preferences and settings.
+          </Text>
+        </View>
+        {renderContent()}
+      </SettingsLayout>
+    )
+  }
+
+  // Mobile/Small Screen View
+  if (showMobileDetail) {
+    return (
+      <SafeAreaView className="flex-1 bg-white dark:bg-brand-black">
+        <View className="flex-row items-center p-4 border-b border-zinc-100 dark:border-white/5">
+          <TouchableOpacity onPress={() => setShowMobileDetail(false)} className="mr-4">
+            <ChevronRight style={{ transform: [{ rotate: '180deg' }] }} size={24} color="#D4AF37" />
+          </TouchableOpacity>
+          <Text className="text-xl font-bold text-zinc-900 dark:text-white capitalize">
+            {activeSection}
+          </Text>
+        </View>
+        <ScrollView className="flex-1" contentContainerClassName="p-4">
+          {renderContent()}
+        </ScrollView>
+      </SafeAreaView>
+    )
+  }
+
   return (
-    <SettingsLayout activeSection={activeSection} onSectionChange={setActiveSection}>
-      <View className="mb-10">
-        <Text className="text-3xl font-bold text-zinc-900 dark:text-white capitalize">
-          {activeSection.replace('-', ' ')}
-        </Text>
-        <Text className="text-zinc-500 mt-2">
-          Manage your {activeSection} preferences and settings.
-        </Text>
+    <MobileProfileSummary 
+      onNavigate={(section) => {
+        setActiveSection(section)
+        setShowMobileDetail(true)
+      }}
+      onLogout={handleLogout}
+    />
+  )
+}
+
+function MobileProfileSummary({ onNavigate, onLogout }: { onNavigate: (s: string) => void, onLogout: () => void }) {
+  const { colorMode, toggleColorMode } = useTheme()
+  const isDark = colorMode === 'dark'
+
+  return (
+    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-brand-black">
+      <ScrollView className="flex-1" contentContainerClassName="p-4 md:p-6 lg:p-8">
+        {/* Profile Header */}
+        <View className="items-center mb-8 pt-4">
+          <View className="relative">
+            <View className="w-24 h-24 bg-blue-100 dark:bg-brand-gold/20 rounded-full items-center justify-center border-4 border-white dark:border-brand-dark-gray shadow-sm">
+              <User className="text-brand-blue dark:text-brand-gold" size={48} />
+            </View>
+            <TouchableOpacity 
+              className="absolute bottom-0 right-0 w-8 h-8 bg-brand-blue dark:bg-brand-gold rounded-full items-center justify-center border-2 border-white dark:border-brand-dark-gray shadow-md"
+              activeOpacity={0.8}
+            >
+              <Camera color="white" size={16} />
+            </TouchableOpacity>
+          </View>
+          <View className="mt-4 items-center">
+            <Text className="text-2xl font-extrabold text-slate-900 dark:text-slate-50">Aizuddin Ahmad</Text>
+            <Text className="text-slate-500 dark:text-slate-400 font-medium mt-1">Senior Software Engineer</Text>
+          </View>
+        </View>
+
+        {/* DOCUMENTS SECTION */}
+        <SectionHeader title="Documents" />
+        <View className="bg-white dark:bg-brand-dark-gray rounded-2xl border border-slate-200 dark:border-zinc-800/50 shadow-sm overflow-hidden mb-8">
+          <SettingsRow 
+            icon={<Receipt className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Payroll & Payslips"
+            onPress={() => onNavigate('payroll')}
+          />
+          <SettingsRow 
+            icon={<FileBadge className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Tax Documents"
+            onPress={() => onNavigate('tax')}
+          />
+          <SettingsRow 
+            icon={<FileText className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="My Documents"
+            isLast={true}
+            onPress={() => onNavigate('documents')}
+          />
+        </View>
+
+        {/* ACCOUNT SETTINGS SECTION */}
+        <SectionHeader title="Account Settings" />
+        <View className="bg-white dark:bg-brand-dark-gray rounded-2xl border border-slate-200 dark:border-zinc-800/50 shadow-sm overflow-hidden mb-8">
+          <SettingsRow 
+            icon={<User className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Personal Information"
+            onPress={() => onNavigate('account')}
+          />
+          <SettingsRow 
+            icon={<Shield className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Security & Privacy"
+            onPress={() => onNavigate('security')}
+          />
+          <SettingsRow 
+            icon={<Bell className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Notifications"
+            onPress={() => onNavigate('notifications')}
+          />
+          <SettingsRow 
+            icon={isDark ? <Sun className="text-brand-blue dark:text-brand-gold" size={20} /> : <Moon className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Dark Mode"
+            isLast={true}
+            trailing={
+              <Switch 
+                value={isDark} 
+                onValueChange={() => toggleColorMode(isDark ? 'light' : 'dark')}
+                trackColor={{ false: '#cbd5e1', true: isDark ? '#D4AF37' : '#0066FF' }}
+                thumbColor="#ffffff"
+              />
+            }
+          />
+        </View>
+
+        {/* HELP & SUPPORT SECTION */}
+        <SectionHeader title="Support" />
+        <View className="bg-white dark:bg-brand-dark-gray rounded-2xl border border-slate-200 dark:border-zinc-800/50 shadow-sm overflow-hidden mb-8">
+          <SettingsRow 
+            icon={<HelpCircle className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Help Center"
+            onPress={() => onNavigate('help')}
+          />
+          <SettingsRow 
+            icon={<Lock className="text-brand-blue dark:text-brand-gold" size={20} />}
+            iconBgColor="bg-blue-50 dark:bg-brand-gold/10"
+            label="Privacy Policy"
+            isLast={true}
+            onPress={() => onNavigate('tos')}
+          />
+        </View>
+
+        {/* Logout */}
+        <TouchableOpacity 
+          onPress={onLogout}
+          className="bg-white dark:bg-brand-dark-gray rounded-2xl border border-slate-200 dark:border-zinc-800/50 shadow-sm p-4 flex-row items-center justify-center gap-2 active:bg-slate-50 dark:active:bg-zinc-800"
+          activeOpacity={0.7}
+        >
+          <LogOut className="text-red-500" size={20} />
+          <Text className="text-red-500 font-bold text-lg">Log Out</Text>
+        </TouchableOpacity>
+        
+        <View className="items-center mt-8 mb-4">
+          <Text className="text-slate-400 dark:text-zinc-600 text-xs">Talego Mobile v2.1.0</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <Text className="text-xs font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 px-1">
+      {title}
+    </Text>
+  )
+}
+
+function SettingsRow({ 
+  icon, 
+  iconBgColor, 
+  label, 
+  trailing, 
+  onPress, 
+  subLabel, 
+  isLast = false 
+}: { 
+  icon: React.ReactNode; 
+  iconBgColor: string; 
+  label: string; 
+  trailing?: React.ReactNode; 
+  onPress?: () => void; 
+  subLabel?: string; 
+  isLast?: boolean; 
+}) {
+  return (
+    <TouchableOpacity 
+      onPress={onPress}
+      disabled={!onPress}
+      className={`flex-row items-center justify-between p-4 ${!isLast ? 'border-b border-zinc-100 dark:border-zinc-800/50' : ''}`}
+    >
+      <View className="flex-row items-center flex-1 pr-4">
+        <View className={`w-10 h-10 ${iconBgColor} rounded-xl items-center justify-center mr-3`}>
+          {icon}
+        </View>
+        <View className="flex-1">
+          <Text className="text-slate-900 dark:text-slate-100 font-semibold">{label}</Text>
+          {subLabel && (
+            <Text className="text-slate-500 dark:text-slate-400 text-xs mt-0.5" numberOfLines={1}>
+              {subLabel}
+            </Text>
+          )}
+        </View>
       </View>
-      {renderContent()}
-    </SettingsLayout>
+      <View>
+        {trailing || <ChevronRight size={18} color="#D1D5DB" />}
+      </View>
+    </TouchableOpacity>
   )
 }
 
