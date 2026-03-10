@@ -243,8 +243,69 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
           </View>
         )}
 
-        {/* Search bar */}
-        <View className="flex-col lg:flex-row justify-end items-center mb-6 gap-4">
+        {/* Controls Row: Search & Filters */}
+        <View className="flex-col lg:flex-row justify-between items-center mb-6 gap-4">
+          <AnimatePresence>
+            <MotiView
+              key={activeTab}
+              from={{ opacity: 0, translateY: -10 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              exit={{ opacity: 0, translateY: -10 }}
+              transition={{ type: 'timing', duration: 250 }}
+              className="h-10 justify-center flex-1 w-full"
+            >
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerClassName="items-center"
+              >
+                <Text className="text-xs font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider mr-4">
+                  Filter Status:
+                </Text>
+                <View className={`${Dimensions.get('window').width >= 1024 ? 'bg-midnight-charcoal/50 p-1 rounded-xl border border-white/5 flex-row gap-2' : 'flex-row items-center'}`}>
+                  {['All', 'Pending', 'Approved', 'Rejected'].map((status) => {
+                    const isFilterActive = filter === status
+                    const isDesktop = Dimensions.get('window').width >= 1024
+                    
+                    if (isDesktop) {
+                      return (
+                        <TouchableOpacity
+                          key={status}
+                          onPress={() => setFilter(status)}
+                          className={`px-6 py-1.5 rounded-xl border ${
+                            isFilterActive
+                              ? 'bg-brand-gold border-brand-gold text-black'
+                              : 'bg-transparent border-transparent hover:bg-white/5 text-slate-500 dark:text-zinc-500'
+                          }`}
+                        >
+                          <Text className={`text-xs font-bold ${isFilterActive ? 'text-black' : 'text-inherit'}`}>
+                            {status}
+                          </Text>
+                        </TouchableOpacity>
+                      )
+                    }
+
+                    return (
+                      <TouchableOpacity
+                        key={status}
+                        onPress={() => setFilter(status)}
+                        className={`px-4 py-1.5 rounded-xl border mr-2 ${
+                          isFilterActive
+                            ? 'bg-brand-gold/10 dark:bg-brand-gold/20 border-brand-gold/30 shadow-sm text-brand-gold'
+                            : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500'
+                        }`}
+                      >
+                        <Text className={`text-xs font-medium text-inherit`}>
+                          {status}
+                        </Text>
+                      </TouchableOpacity>
+                    )
+                  })}
+                </View>
+              </ScrollView>
+            </MotiView>
+          </AnimatePresence>
+
           <View className="bg-white dark:bg-[#1A1A1A] border border-slate-200 dark:border-white/5 rounded-xl px-4 py-2 flex-row items-center gap-3 w-full lg:w-64">
             <Search size={16} className="text-slate-400" />
             <TextInput 
@@ -256,68 +317,6 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
             />
           </View>
         </View>
-
-        {/* Sub-Filters */}
-        <AnimatePresence>
-          <MotiView
-            key={activeTab}
-            from={{ opacity: 0, translateY: -10 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            exit={{ opacity: 0, translateY: -10 }}
-            transition={{ type: 'timing', duration: 250 }}
-            className="mb-6 h-10 justify-center"
-          >
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="items-center"
-            >
-              <Text className="text-xs font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider mr-4">
-                Filter Status:
-              </Text>
-              <View className={`${Dimensions.get('window').width >= 1024 ? 'bg-midnight-charcoal/50 p-1 rounded-full border border-white/5 flex-row gap-2' : 'flex-row items-center'}`}>
-                {['All', 'Pending', 'Approved', 'Rejected'].map((status) => {
-                  const isFilterActive = filter === status
-                  const isDesktop = Dimensions.get('window').width >= 1024
-                  
-                  if (isDesktop) {
-                    return (
-                      <TouchableOpacity
-                        key={status}
-                        onPress={() => setFilter(status)}
-                        className={`px-6 py-1.5 rounded-full border ${
-                          isFilterActive
-                            ? 'bg-brand-gold border-brand-gold text-black'
-                            : 'bg-transparent border-transparent hover:bg-white/5 text-slate-500 dark:text-zinc-500'
-                        }`}
-                      >
-                        <Text className={`text-xs font-bold ${isFilterActive ? 'text-black' : 'text-inherit'}`}>
-                          {status}
-                        </Text>
-                      </TouchableOpacity>
-                    )
-                  }
-
-                  return (
-                    <TouchableOpacity
-                      key={status}
-                      onPress={() => setFilter(status)}
-                      className={`px-4 py-1.5 rounded-full border mr-2 ${
-                        isFilterActive
-                          ? 'bg-brand-gold/10 dark:bg-brand-gold/20 border-brand-gold/30 shadow-sm text-brand-gold'
-                          : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500'
-                      }`}
-                    >
-                      <Text className={`text-xs font-medium text-inherit`}>
-                        {status}
-                      </Text>
-                    </TouchableOpacity>
-                  )
-                })}
-              </View>
-            </ScrollView>
-          </MotiView>
-        </AnimatePresence>
 
         {/* Table Area */}
         <View className="flex-1 bg-white dark:bg-[#1A1A1A] rounded-t-xl border border-b-0 border-slate-200 dark:border-white/5 overflow-hidden shadow-sm">

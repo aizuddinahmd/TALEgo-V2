@@ -210,7 +210,7 @@ export function ActivityScreen() {
                     animate={{ opacity: 1, width: width - 100 }}
                     exit={{ opacity: 0, width: 0 }}
                     key="search"
-                    className="flex-1 bg-slate-50 dark:bg-white/5 rounded-full px-4 py-2 flex-row items-center"
+                    className="flex-1 bg-slate-50 dark:bg-white/5 rounded-xl px-4 py-2 flex-row items-center"
                 >
                     <Search size={18} color={isDark ? '#94a3b8' : '#64748b'} />
                     <TextInput
@@ -252,7 +252,7 @@ export function ActivityScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 24, gap: 10 }}
         >
-          <View className={`flex-row gap-2 ${width >= 1024 ? 'bg-midnight-charcoal/50 p-1 rounded-full border border-white/5' : ''}`}>
+          <View className={`flex-row gap-2 ${width >= 1024 ? 'bg-midnight-charcoal/50 p-1 rounded-xl border border-white/5' : ''}`}>
             {(['All', 'Leaves', 'Claims', 'Attendance'] as ActivityCategory[]).map((filter) => {
               const isActive = activeFilter === filter
               const isDesktop = width >= 1024
@@ -262,7 +262,7 @@ export function ActivityScreen() {
                   <TouchableOpacity
                     key={filter}
                     onPress={() => setActiveFilter(filter)}
-                    className={`px-6 py-2 rounded-full border transition-all ${
+                    className={`px-6 py-2 rounded-xl border transition-all ${
                       isActive
                         ? 'bg-brand-gold border-brand-gold'
                         : 'bg-transparent border-transparent hover:bg-white/5'
@@ -283,7 +283,7 @@ export function ActivityScreen() {
                 <TouchableOpacity
                   key={filter}
                   onPress={() => setActiveFilter(filter)}
-                  className={`px-6 py-2 rounded-full border transition-all ${
+                  className={`px-6 py-2 rounded-xl border transition-all ${
                     isActive
                       ? 'bg-brand-gold border-brand-gold'
                       : 'bg-transparent border-slate-200 dark:border-white/10'
