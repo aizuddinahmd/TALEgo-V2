@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import * as React from 'react'
+import { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -7,6 +8,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   TextInput,
+  Dimensions,
 } from 'react-native'
 import { MotiView, AnimatePresence } from 'moti'
 import {
@@ -22,6 +24,7 @@ import {
 } from 'lucide-react-native'
 import { fetchLeaveBalances, getStaffProfile, fetchLeaveRecords, fetchExpenseRecords, fetchAttendanceRecords } from '../../api/records'
 import { LeaveApplicationModal } from './LeaveApplicationModal'
+import { ClaimApplicationModal } from './ClaimApplicationModal'
 
 export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
   const activeTab = initialTab || 'expenses'
@@ -33,6 +36,7 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
   const [balances, setBalances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
 
   useEffect(() => {
     const initStaff = async () => {
@@ -190,6 +194,12 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
                 } else {
                   setIsModalOpen(true)
                 }
+              } else if (activeTab === 'claims' || activeTab === 'expenses') {
+                if (!staffId) {
+                  alert("You must have a registered staff profile to submit a claim.")
+                } else {
+                  setIsClaimModalOpen(true)
+                }
               }
             }}
             className="bg-brand-gold rounded-lg px-6 py-3 flex-row items-center gap-2 active:opacity-80 shadow-lg shadow-brand-gold/20"
@@ -255,7 +265,7 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
             animate={{ opacity: 1, translateY: 0 }}
             exit={{ opacity: 0, translateY: -10 }}
             transition={{ type: 'timing', duration: 250 }}
-            className="mb-6 h-8 justify-center"
+            className="mb-6 h-10 justify-center"
           >
             <ScrollView
               horizontal
@@ -265,24 +275,46 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
               <Text className="text-xs font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-wider mr-4">
                 Filter Status:
               </Text>
-              {['All', 'Pending', 'Approved', 'Rejected'].map((status) => {
-                const isFilterActive = filter === status
-                return (
-                  <TouchableOpacity
-                    key={status}
-                    onPress={() => setFilter(status)}
-                    className={`px-4 py-1.5 rounded-full border mr-2 ${
-                      isFilterActive
-                        ? 'bg-brand-gold/10 dark:bg-brand-gold/20 border-brand-gold/30 shadow-sm text-brand-gold'
-                        : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500'
-                    }`}
-                  >
-                    <Text className={`text-xs font-medium text-inherit`}>
-                      {status}
-                    </Text>
-                  </TouchableOpacity>
-                )
-              })}
+              <View className={`${Dimensions.get('window').width >= 1024 ? 'bg-midnight-charcoal/50 p-1 rounded-full border border-white/5 flex-row gap-2' : 'flex-row items-center'}`}>
+                {['All', 'Pending', 'Approved', 'Rejected'].map((status) => {
+                  const isFilterActive = filter === status
+                  const isDesktop = Dimensions.get('window').width >= 1024
+                  
+                  if (isDesktop) {
+                    return (
+                      <TouchableOpacity
+                        key={status}
+                        onPress={() => setFilter(status)}
+                        className={`px-6 py-1.5 rounded-full border ${
+                          isFilterActive
+                            ? 'bg-brand-gold border-brand-gold text-black'
+                            : 'bg-transparent border-transparent hover:bg-white/5 text-slate-500 dark:text-zinc-500'
+                        }`}
+                      >
+                        <Text className={`text-xs font-bold ${isFilterActive ? 'text-black' : 'text-inherit'}`}>
+                          {status}
+                        </Text>
+                      </TouchableOpacity>
+                    )
+                  }
+
+                  return (
+                    <TouchableOpacity
+                      key={status}
+                      onPress={() => setFilter(status)}
+                      className={`px-4 py-1.5 rounded-full border mr-2 ${
+                        isFilterActive
+                          ? 'bg-brand-gold/10 dark:bg-brand-gold/20 border-brand-gold/30 shadow-sm text-brand-gold'
+                          : 'bg-transparent border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500'
+                      }`}
+                    >
+                      <Text className={`text-xs font-medium text-inherit`}>
+                        {status}
+                      </Text>
+                    </TouchableOpacity>
+                  )
+                })}
+              </View>
             </ScrollView>
           </MotiView>
         </AnimatePresence>
@@ -468,15 +500,26 @@ export function MyRecordScreen({ initialTab }: { initialTab?: string }) {
       
       {/* Leave Modal */}
       {staffId && orgId && (
-        <LeaveApplicationModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          staffId={staffId}
-          orgId={orgId}
-          onSuccess={() => {
-            loadData()
-          }}
-        />
+        <>
+          <LeaveApplicationModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            staffId={staffId}
+            orgId={orgId}
+            onSuccess={() => {
+              loadData()
+            }}
+          />
+          <ClaimApplicationModal
+            isOpen={isClaimModalOpen}
+            onClose={() => setIsClaimModalOpen(false)}
+            staffId={staffId}
+            orgId={orgId}
+            onSuccess={() => {
+              loadData()
+            }}
+          />
+        </>
       )}
     </SafeAreaView>
   )

@@ -105,6 +105,8 @@ export const submitLeaveRequest = async (payload: {
   end_date: string
   total_days: number
   reason: string
+  is_half_day?: boolean
+  half_day_period?: 'Morning' | 'Afternoon' | null
 }) => {
   const { data, error } = await supabase
     .from('leave_requests')

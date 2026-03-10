@@ -29,6 +29,9 @@ import {
 import { getStaffProfile, fetchLeaveRecords, fetchExpenseRecords, fetchAttendanceRecords } from '../../api/records'
 import { useTheme } from 'app/provider/theme'
 import { Modal } from 'react-native'
+import { LeaveApplicationModal } from '../my-record/LeaveApplicationModal'
+import { ClaimApplicationModal } from '../my-record/ClaimApplicationModal'
+import { Plus } from 'lucide-react-native'
 
 const { width } = Dimensions.get('window')
 
@@ -58,7 +61,13 @@ export function ActivityScreen() {
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [refreshing, setRefreshing] = useState(false)
   const [staffId, setStaffId] = useState<string | null>(null)
+  const [orgId, setOrgId] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] = useState<ActivityItem | null>(null)
+  
+  // Modal states
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -66,6 +75,7 @@ export function ActivityScreen() {
         const profile = await getStaffProfile()
         if (profile) {
           setStaffId(profile.staff_id)
+          setOrgId(profile.org_id)
         }
       } catch (err) {
         console.error('Failed to get staff profile', err)
@@ -242,28 +252,54 @@ export function ActivityScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 24, gap: 10 }}
         >
-          {(['All', 'Leaves', 'Claims', 'Attendance'] as ActivityCategory[]).map((filter) => {
-            const isActive = activeFilter === filter
-            return (
-              <TouchableOpacity
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
-                className={`px-6 py-2 rounded-full border transition-all ${
-                  isActive
-                    ? 'bg-brand-gold border-brand-gold'
-                    : 'bg-transparent border-slate-200 dark:border-white/10'
-                }`}
-              >
-                <Text
-                  className={`text-sm font-bold ${
-                    isActive ? 'text-black' : 'text-slate-500 dark:text-zinc-400'
+          <View className={`flex-row gap-2 ${width >= 1024 ? 'bg-midnight-charcoal/50 p-1 rounded-full border border-white/5' : ''}`}>
+            {(['All', 'Leaves', 'Claims', 'Attendance'] as ActivityCategory[]).map((filter) => {
+              const isActive = activeFilter === filter
+              const isDesktop = width >= 1024
+              
+              if (isDesktop) {
+                return (
+                  <TouchableOpacity
+                    key={filter}
+                    onPress={() => setActiveFilter(filter)}
+                    className={`px-6 py-2 rounded-full border transition-all ${
+                      isActive
+                        ? 'bg-brand-gold border-brand-gold'
+                        : 'bg-transparent border-transparent hover:bg-white/5'
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-bold ${
+                        isActive ? 'text-black' : 'text-slate-500 dark:text-zinc-400'
+                      }`}
+                    >
+                      {filter}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              }
+
+              return (
+                <TouchableOpacity
+                  key={filter}
+                  onPress={() => setActiveFilter(filter)}
+                  className={`px-6 py-2 rounded-full border transition-all ${
+                    isActive
+                      ? 'bg-brand-gold border-brand-gold'
+                      : 'bg-transparent border-slate-200 dark:border-white/10'
                   }`}
                 >
-                  {filter}
-                </Text>
-              </TouchableOpacity>
-            )
-          })}
+                  <Text
+                    className={`text-sm font-bold ${
+                      isActive ? 'text-black' : 'text-slate-500 dark:text-zinc-400'
+                    }`}
+                  >
+                    {filter}
+                  </Text>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
         </ScrollView>
       </View>
 
@@ -338,13 +374,83 @@ export function ActivityScreen() {
         )}
       </ScrollView>
 
-      {/* Detail Bottom Sheet */}
       <DetailBottomSheet 
         item={selectedItem} 
         isVisible={!!selectedItem} 
         onClose={() => setSelectedItem(null)} 
         isDark={isDark}
       />
+
+      {/* FAB and Action Modals */}
+      {staffId && orgId && (
+        <>
+          <View className="absolute bottom-10 right-6 items-end">
+            <AnimatePresence>
+              {isFabMenuOpen && (
+                <MotiView
+                  from={{ opacity: 0, scale: 0.5, translateY: 20 }}
+                  animate={{ opacity: 1, scale: 1, translateY: 0 }}
+                  exit={{ opacity: 0, scale: 0.5, translateY: 20 }}
+                  className="mb-4 gap-3 items-end"
+                >
+                  <TouchableOpacity 
+                    onPress={() => {
+                      setIsLeaveModalOpen(true)
+                      setIsFabMenuOpen(false)
+                    }}
+                    className="flex-row items-center bg-[#1A1A1A] border border-white/10 px-4 py-3 rounded-2xl shadow-xl"
+                  >
+                    <Text className="text-white font-bold mr-3">Apply Leave</Text>
+                    <View className="w-10 h-10 bg-brand-gold rounded-xl items-center justify-center">
+                      <Calendar size={20} color="black" />
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    onPress={() => {
+                      setIsClaimModalOpen(true)
+                      setIsFabMenuOpen(false)
+                    }}
+                    className="flex-row items-center bg-[#1A1A1A] border border-white/10 px-4 py-3 rounded-2xl shadow-xl"
+                  >
+                    <Text className="text-white font-bold mr-3">Submit Claim</Text>
+                    <View className="w-10 h-10 bg-brand-gold rounded-xl items-center justify-center">
+                      <Receipt size={20} color="black" />
+                    </View>
+                  </TouchableOpacity>
+                </MotiView>
+              )}
+            </AnimatePresence>
+
+            <TouchableOpacity 
+              onPress={() => setIsFabMenuOpen(!isFabMenuOpen)}
+              className="w-16 h-16 bg-brand-gold rounded-2xl items-center justify-center shadow-2xl shadow-brand-gold/40 active:scale-95 transition-all"
+            >
+              <MotiView
+                animate={{ rotate: isFabMenuOpen ? '45deg' : '0deg' }}
+              >
+                <Plus size={32} color="black" />
+              </MotiView>
+            </TouchableOpacity>
+          </View>
+
+          <LeaveApplicationModal
+            isOpen={isLeaveModalOpen}
+            onClose={() => setIsLeaveModalOpen(false)}
+            staffId={staffId}
+            orgId={orgId}
+            onSuccess={() => loadData(true)}
+          />
+
+          <ClaimApplicationModal
+            isOpen={isClaimModalOpen}
+            onClose={() => setIsClaimModalOpen(false)}
+            staffId={staffId}
+            orgId={orgId}
+            onSuccess={() => loadData(true)}
+          />
+        </>
+      )}
     </SafeAreaView>
   )
 }

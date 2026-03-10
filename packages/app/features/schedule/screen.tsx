@@ -360,12 +360,12 @@ function DesktopView({
 
           <View className="flex-row items-center gap-6">
             {/* Navigation Toggles */}
-            <View className="bg-midnight-charcoal/50 p-1 rounded-2xl flex-row border border-gunmetal w-64">
+            <View className="bg-midnight-charcoal/50 p-1 rounded-full flex-row border border-gunmetal">
               {(['day', 'week', 'month'] as const).map((v) => (
                 <TouchableOpacity 
                   key={v}
                   onPress={() => setActiveView(v)}
-                  className={`flex-1 py-2 items-center rounded-xl border ${activeView === v ? 'bg-metallic-gold border-metallic-gold' : 'border-transparent hover:border-metallic-gold'}`}
+                  className={`px-6 py-2 items-center rounded-full border ${activeView === v ? 'bg-metallic-gold border-metallic-gold' : 'border-transparent hover:bg-white/5'}`}
                 >
                   <Text className={`capitalize font-bold text-xs ${activeView === v ? 'text-deep-black' : 'text-muted-silver'}`}>
                     {v}

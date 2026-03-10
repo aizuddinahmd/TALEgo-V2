@@ -108,7 +108,7 @@ export function EmployeeOverview() {
   };
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: any;
     if (attendanceStatus === 'active' && todayLog?.checkin_time) {
       const checkinTime = new Date(todayLog.checkin_time).getTime();
       

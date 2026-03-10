@@ -6,6 +6,7 @@ import {
   ScrollView,
   SafeAreaView,
   Platform,
+  Dimensions,
 } from 'react-native'
 import { Eye, EyeOff, FileText, Download, Calendar } from 'lucide-react-native'
 import { PayBreakdownCard } from '../../ui/pay-breakdown-card'
@@ -133,18 +134,37 @@ export function PayrollScreen({ initialTab }: { initialTab?: string }) {
         </View>
 
         {/* Tab Switcher */}
-        <View className="flex-row gap-2 mb-8 bg-slate-200/50 dark:bg-zinc-900/50 p-1 rounded-xl self-start">
-          {tabs.map((tab) => (
-            <TouchableOpacity 
-              key={tab.id}
-              onPress={() => setActiveTab(tab.id)}
-              className={`px-6 py-2 rounded-lg transition-all ${activeTab === tab.id ? 'bg-white dark:bg-zinc-800 shadow-sm' : ''}`}
-            >
-              <Text className={`text-sm font-bold ${activeTab === tab.id ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}>
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <View className={`mb-8 self-start ${Dimensions.get('window').width >= 1024 ? 'bg-midnight-charcoal/50 p-1 rounded-full border border-white/5 flex-row gap-2' : 'flex-row gap-2 bg-slate-200/50 dark:bg-zinc-900/50 p-1 rounded-xl'}`}>
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id
+            const isDesktop = Dimensions.get('window').width >= 1024
+            
+            if (isDesktop) {
+              return (
+                <TouchableOpacity 
+                  key={tab.id}
+                  onPress={() => setActiveTab(tab.id)}
+                  className={`px-6 py-2 rounded-full transition-all border ${isActive ? 'bg-metallic-gold border-metallic-gold' : 'bg-transparent border-transparent hover:bg-white/5'}`}
+                >
+                  <Text className={`text-sm font-bold ${isActive ? 'text-deep-black' : 'text-muted-silver'}`}>
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              )
+            }
+
+            return (
+              <TouchableOpacity 
+                key={tab.id}
+                onPress={() => setActiveTab(tab.id)}
+                className={`px-6 py-2 rounded-lg transition-all ${activeTab === tab.id ? 'bg-white dark:bg-zinc-800 shadow-sm' : ''}`}
+              >
+                <Text className={`text-sm font-bold ${activeTab === tab.id ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500'}`}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            )
+          })}
         </View>
 
         {activeTab === 'payslips' ? (

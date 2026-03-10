@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native'
 import { X, Calendar as CalendarIcon, FileText, ChevronDown } from 'lucide-react-native'
+import { MotiView } from 'moti'
 import { fetchLeaveBalances, fetchLeaveTypes, submitLeaveRequest } from '../../api/records'
 
 interface LeaveApplicationModalProps {
@@ -36,6 +37,8 @@ export function LeaveApplicationModal({
   const [selectedType, setSelectedType] = useState<string | null>(null)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [isHalfDay, setIsHalfDay] = useState(false)
+  const [halfDayPeriod, setHalfDayPeriod] = useState<'Morning' | 'Afternoon'>('Morning')
   const [reason, setReason] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -68,12 +71,15 @@ export function LeaveApplicationModal({
     setSelectedType(null)
     setStartDate('')
     setEndDate('')
+    setIsHalfDay(false)
+    setHalfDayPeriod('Morning')
     setReason('')
     setIsDropdownOpen(false)
   }
 
   // Simple date diff (assuming YYYY-MM-DD format for demo purposes)
-  const calculateDays = (start: string, end: string) => {
+  const calculateDays = (start: string, end: string, halfDay: boolean) => {
+    if (halfDay) return 0.5
     if (!start || !end) return 0
     const d1 = new Date(start)
     const d2 = new Date(end)
@@ -83,13 +89,13 @@ export function LeaveApplicationModal({
   }
 
   const handleSubmit = async () => {
-    if (!selectedType || !startDate || !endDate || !reason) {
+    if (!selectedType || !startDate || (!isHalfDay && !endDate) || !reason) {
       Alert.alert('Error', 'Please fill in all fields')
       return
     }
 
-    const totalDays = calculateDays(startDate, endDate)
-    if (totalDays <= 0) {
+    const totalDays = calculateDays(startDate, endDate, isHalfDay)
+    if (!isHalfDay && totalDays <= 0) {
       Alert.alert('Error', 'End date must be after or same as start date')
       return
     }
@@ -101,9 +107,11 @@ export function LeaveApplicationModal({
         staff_id: staffId,
         leave_type_id: selectedType,
         start_date: startDate,
-        end_date: endDate,
+        end_date: isHalfDay ? startDate : endDate,
         total_days: totalDays,
         reason,
+        is_half_day: isHalfDay,
+        half_day_period: isHalfDay ? halfDayPeriod : null,
       })
       onSuccess()
       onClose()
@@ -226,49 +234,111 @@ export function LeaveApplicationModal({
                   )}
                 </View>
 
-                {/* Dates (Hidden under dropdown z-index if open, so wrapped in z-0 container) */}
-                <View className={`${isDropdownOpen ? 'opacity-30 z-0' : 'z-10'} flex-row gap-4 transition-opacity`}>
-                  <View className="flex-1">
-                    <Text className="text-sm font-bold text-zinc-300 mb-2">
-                      Start Date *
-                    </Text>
-                    <View className="flex-row items-center border border-white/10 rounded-lg bg-[#1A1A1A] px-3 focus-within:border-brand-gold transition-colors">
-                      <CalendarIcon size={16} className="text-zinc-500" />
-                      <TextInput
-                        value={startDate}
-                        onChangeText={setStartDate}
-                        placeholder="YYYY-MM-DD"
-                        className="flex-1 py-3 px-2 text-white font-mono"
-                        placeholderTextColor="#71717a"
-                      />
+                {/* Dates */}
+                <View className={`${isDropdownOpen ? 'opacity-30 z-0' : 'z-10'} gap-6 transition-opacity`}>
+                  {/* Half Day Toggle */}
+                  <View className="flex-row items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                    <View>
+                      <Text className="text-white font-bold">Half Day Application</Text>
+                      <Text className="text-xs text-zinc-500">Apply for 0.5 day leave</Text>
                     </View>
+                    <TouchableOpacity 
+                      onPress={() => setIsHalfDay(!isHalfDay)}
+                      className={`w-12 h-6 rounded-full px-1 justify-center ${isHalfDay ? 'bg-brand-gold' : 'bg-zinc-800'}`}
+                    >
+                      <MotiView 
+                        animate={{ translateX: isHalfDay ? 24 : 0 }}
+                        transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+                        className="w-4 h-4 rounded-full bg-white"
+                      />
+                    </TouchableOpacity>
                   </View>
 
-                  <View className="flex-1">
-                    <Text className="text-sm font-bold text-zinc-300 mb-2">
-                      End Date *
-                    </Text>
-                    <View className="flex-row items-center border border-white/10 rounded-lg bg-[#1A1A1A] px-3 focus-within:border-brand-gold transition-colors">
-                      <CalendarIcon size={16} className="text-zinc-500" />
-                      <TextInput
-                        value={endDate}
-                        onChangeText={setEndDate}
-                        placeholder="YYYY-MM-DD"
-                        className="flex-1 py-3 px-2 text-white font-mono"
-                        placeholderTextColor="#71717a"
-                      />
+                  {isHalfDay ? (
+                    <View className="gap-4">
+                      <View>
+                        <Text className="text-sm font-bold text-zinc-300 mb-2">
+                          Date *
+                        </Text>
+                        <View className="flex-row items-center border border-white/10 rounded-lg bg-[#1A1A1A] px-3 focus-within:border-brand-gold transition-colors">
+                          <CalendarIcon size={16} className="text-zinc-500" />
+                          <TextInput
+                            value={startDate}
+                            onChangeText={setStartDate}
+                            placeholder="YYYY-MM-DD"
+                            className="flex-1 py-3 px-2 text-white font-mono"
+                            placeholderTextColor="#71717a"
+                          />
+                        </View>
+                      </View>
+                      <View>
+                        <Text className="text-sm font-bold text-zinc-300 mb-2">
+                          Period *
+                        </Text>
+                        <View className="flex-row gap-2">
+                          {(['Morning', 'Afternoon'] as const).map((period) => (
+                            <TouchableOpacity
+                              key={period}
+                              onPress={() => setHalfDayPeriod(period)}
+                              className={`flex-1 py-3 rounded-lg border items-center justify-center ${
+                                halfDayPeriod === period 
+                                  ? 'border-brand-gold bg-brand-gold/10' 
+                                  : 'border-white/10 bg-white/5'
+                              }`}
+                            >
+                              <Text className={`font-bold ${halfDayPeriod === period ? 'text-brand-gold' : 'text-zinc-500'}`}>
+                                {period}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
                     </View>
-                  </View>
+                  ) : (
+                    <View className="flex-row gap-4">
+                      <View className="flex-1">
+                        <Text className="text-sm font-bold text-zinc-300 mb-2">
+                          Start Date *
+                        </Text>
+                        <View className="flex-row items-center border border-white/10 rounded-lg bg-[#1A1A1A] px-3 focus-within:border-brand-gold transition-colors">
+                          <CalendarIcon size={16} className="text-zinc-500" />
+                          <TextInput
+                            value={startDate}
+                            onChangeText={setStartDate}
+                            placeholder="YYYY-MM-DD"
+                            className="flex-1 py-3 px-2 text-white font-mono"
+                            placeholderTextColor="#71717a"
+                          />
+                        </View>
+                      </View>
+
+                      <View className="flex-1">
+                        <Text className="text-sm font-bold text-zinc-300 mb-2">
+                          End Date *
+                        </Text>
+                        <View className="flex-row items-center border border-white/10 rounded-lg bg-[#1A1A1A] px-3 focus-within:border-brand-gold transition-colors">
+                          <CalendarIcon size={16} className="text-zinc-500" />
+                          <TextInput
+                            value={endDate}
+                            onChangeText={setEndDate}
+                            placeholder="YYYY-MM-DD"
+                            className="flex-1 py-3 px-2 text-white font-mono"
+                            placeholderTextColor="#71717a"
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  )}
                 </View>
 
                 {/* Info Text */}
-                {startDate && endDate && calculateDays(startDate, endDate) > 0 && !isDropdownOpen && (
+                {((isHalfDay && startDate) || (startDate && endDate && calculateDays(startDate, endDate, isHalfDay) > 0)) && !isDropdownOpen && (
                   <View className="bg-brand-gold/10 border border-brand-gold/20 p-3 rounded-lg flex-row justify-between items-center">
                     <Text className="text-sm text-brand-gold/80 flex-1">
                       Computed duration based on inputs:
                     </Text>
                     <Text className="text-sm font-bold text-brand-gold font-mono">
-                      {calculateDays(startDate, endDate)} Days
+                      {calculateDays(startDate, endDate, isHalfDay)} Days
                     </Text>
                   </View>
                 )}
@@ -312,9 +382,9 @@ export function LeaveApplicationModal({
 
             <TouchableOpacity
               onPress={handleSubmit}
-              disabled={isSubmitting || !selectedType || !startDate || !endDate || !reason}
+              disabled={isSubmitting || !selectedType || !startDate || (!isHalfDay && !endDate) || !reason}
               className={`px-6 py-3 rounded-lg flex-row items-center justify-center gap-2 ${
-                isSubmitting || !selectedType || !startDate || !endDate || !reason
+                isSubmitting || !selectedType || !startDate || (!isHalfDay && !endDate) || !reason
                   ? 'bg-brand-gold/30'
                   : 'bg-brand-gold shadow-[0_0_15px_rgba(251,191,36,0.3)] active:scale-95 hover:bg-yellow-400'
               } transition-all`}
