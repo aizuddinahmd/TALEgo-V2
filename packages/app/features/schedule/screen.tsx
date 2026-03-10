@@ -73,8 +73,8 @@ const SHIFTS_MOCK: Shift[] = [
 ];
 
 // Helper to generate dates starting from a specific week's Monday
-const generateWeekDates = (baseDate: Date, weekOffset = 0): { dayName: string; dayNumber: string; fullDate: string }[] => {
-  const dates: { dayName: string; dayNumber: string; fullDate: string }[] = [];
+const generateWeekDates = (baseDate: Date, weekOffset = 0): { dayName: string; dayNumber: string; fullDate: string, date: Date }[] => {
+  const dates: { dayName: string; dayNumber: string; fullDate: string, date: Date }[] = [];
   
   // Get day of week (0-6, 0 is Sunday)
   const day = baseDate.getDay();
@@ -93,10 +93,27 @@ const generateWeekDates = (baseDate: Date, weekOffset = 0): { dayName: string; d
     dates.push({
       dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
       dayNumber: d.getDate().toString().padStart(2, '0'),
-      fullDate: formatDateISO(d)
+      fullDate: formatDateISO(d),
+      date: d
     });
   }
   return dates;
+};
+
+const getWeekOfMonth = (date: Date) => {
+  const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  const firstDayOfWeek = firstDayOfMonth.getDay() || 7; // 1 (Mon) to 7 (Sun)
+  const offsetDate = date.getDate() + firstDayOfWeek - 1;
+  return Math.ceil(offsetDate / 7);
+};
+
+const formatWeekRange = (date: Date) => {
+  const weekDates = generateWeekDates(date, 0).slice(0, 7);
+  const start = weekDates[0]!.date;
+  const end = weekDates[6]!.date;
+  
+  const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
+  return `${start.toLocaleDateString('en-GB', options)} – ${end.toLocaleDateString('en-GB', options)}`;
 };
 
 // Note: Unused helper functions (getStatusBadgeStyles, getStatusDotColor, TeamPulse, MonthView) removed as per redesign.
@@ -278,47 +295,90 @@ function DesktopView({
       {/* Main Content Area */}
       <View className="flex-1">
         {/* Top Header */}
-        <View className="h-20 border-b border-gunmetal flex-row items-center justify-between px-10">
+        <View className="h-28 border-b border-gunmetal flex-row items-center justify-between px-10 bg-deep-black">
           <View className="flex-row items-center gap-6">
-            <Text className="text-metallic-gold text-2xl font-bold mr-4">Talego</Text>
-            
-            <View className="flex-row items-center gap-4">
-              <Text className="text-white text-xl font-bold">
-                {viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            {/* Date Block */}
+            <View className="w-16 h-16 bg-midnight-charcoal border border-gunmetal rounded-2xl overflow-hidden shadow-sm">
+              <View className="bg-deep-black/60 py-1.5 items-center border-b border-gunmetal">
+                <Text className="text-[9px] font-bold text-muted-silver uppercase tracking-[2px]">
+                  {viewDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}
+                </Text>
+              </View>
+              <View className="flex-1 items-center justify-center bg-midnight-charcoal">
+                <Text className="text-2xl font-bold text-white tracking-tighter">
+                  {viewDate.getDate().toString().padStart(2, '0')}
+                </Text>
+              </View>
+            </View>
+
+            <View>
+              <View className="flex-row items-center gap-3 mb-1">
+                <Text className="text-white text-2xl font-bold">
+                  {viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </Text>
+                <View className="bg-gunmetal px-2.5 py-1 rounded-lg border border-white/5">
+                  <Text className="text-muted-silver text-[10px] font-bold uppercase tracking-wider">Week {getWeekOfMonth(viewDate)}</Text>
+                </View>
+              </View>
+              <Text className="text-muted-silver text-sm font-medium">
+                {formatWeekRange(viewDate)}
               </Text>
-              <View className="flex-row bg-midnight-charcoal border border-gunmetal rounded-lg">
-                <TouchableOpacity className="p-2 border-r border-gunmetal">
-                  <ChevronLeft size={16} color="white" />
+            </View>
+
+            {/* Navigation Controls */}
+            <View className="flex-row items-center gap-3 ml-6">
+              <View className="flex-row bg-midnight-charcoal border border-gunmetal rounded-xl overflow-hidden">
+                <TouchableOpacity 
+                  onPress={() => {
+                    const d = new Date(viewDate);
+                    d.setDate(d.getDate() - 7);
+                    setViewDate(d);
+                  }}
+                  className="p-2.5 border-r border-gunmetal hover:bg-white/5"
+                >
+                  <ChevronLeft size={18} color="white" />
                 </TouchableOpacity>
-                <TouchableOpacity className="p-2">
-                  <ChevronRight size={16} color="white" />
+                <TouchableOpacity 
+                  onPress={() => {
+                    const d = new Date(viewDate);
+                    d.setDate(d.getDate() + 7);
+                    setViewDate(d);
+                  }}
+                  className="p-2.5 hover:bg-white/5"
+                >
+                  <ChevronRight size={18} color="white" />
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity className="bg-metallic-gold px-4 py-1.5 rounded-lg">
+              <TouchableOpacity 
+                onPress={() => setViewDate(new Date())}
+                className="bg-metallic-gold px-5 py-2.5 rounded-xl"
+              >
                 <Text className="text-deep-black font-bold text-sm">Today</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Navigation Toggles (Moved to Header) */}
-          <View className="bg-midnight-charcoal/50 p-1 rounded-xl flex-row border border-gunmetal w-64">
-            {(['day', 'week', 'month'] as const).map((v) => (
-              <TouchableOpacity 
-                key={v}
-                onPress={() => setActiveView(v)}
-                className={`flex-1 py-1.5 items-center rounded-lg border ${activeView === v ? 'bg-metallic-gold border-metallic-gold' : 'border-transparent hover:border-metallic-gold'}`}
-              >
-                <Text className={`capitalize font-bold text-xs ${activeView === v ? 'text-deep-black' : 'text-muted-silver'}`}>
-                  {v}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View className="flex-row items-center gap-6">
+            {/* Navigation Toggles */}
+            <View className="bg-midnight-charcoal/50 p-1 rounded-2xl flex-row border border-gunmetal w-64">
+              {(['day', 'week', 'month'] as const).map((v) => (
+                <TouchableOpacity 
+                  key={v}
+                  onPress={() => setActiveView(v)}
+                  className={`flex-1 py-2 items-center rounded-xl border ${activeView === v ? 'bg-metallic-gold border-metallic-gold' : 'border-transparent hover:border-metallic-gold'}`}
+                >
+                  <Text className={`capitalize font-bold text-xs ${activeView === v ? 'text-deep-black' : 'text-muted-silver'}`}>
+                    {v}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            
+            <TouchableOpacity className="flex-row items-center gap-2 bg-midnight-charcoal border border-gunmetal px-5 py-2.5 rounded-2xl hover:border-metallic-gold/50">
+               <CalendarPlus size={20} color="#D4AF37" />
+               <Text className="text-white font-bold">Add Shift</Text>
+            </TouchableOpacity>
           </View>
-          
-          <TouchableOpacity className="flex-row items-center gap-2 bg-midnight-charcoal border border-gunmetal px-4 py-2 rounded-xl">
-             <CalendarPlus size={18} color="#D4AF37" />
-             <Text className="text-white font-bold">Add Shift</Text>
-          </TouchableOpacity>
         </View>
 
         <ScrollView className="flex-1">
