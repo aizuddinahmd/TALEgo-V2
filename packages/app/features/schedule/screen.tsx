@@ -106,16 +106,33 @@ export function ScheduleScreen() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDate, setSelectedDate] = useState(formatDateISO(new Date()));
   const [hasMounted, setHasMounted] = useState(false);
+  const [activeView, setActiveView] = useState<'day' | 'week' | 'month'>('day');
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
-  const weekDates = generateWeekDates(viewDate, weekOffset).slice(0, 7); // Show 7 days for the row
+  const { width } = Dimensions.get('window');
+  const isDesktop = width >= 1024;
+
+  if (!hasMounted) return null;
+
+  if (isDesktop) {
+    return (
+      <DesktopView 
+        viewDate={viewDate} 
+        setViewDate={setViewDate}
+        activeView={activeView}
+        setActiveView={setActiveView}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+      />
+    );
+  }
+
+  const weekDates = generateWeekDates(viewDate, weekOffset).slice(0, 7);
   const activeShift = SHIFTS_MOCK.find(shift => shift.date === selectedDate);
   const upcomingShifts = SHIFTS_MOCK.filter(shift => shift.date > selectedDate);
-
-  const { width } = Dimensions.get('window');
 
   return (
     <SafeAreaView className="flex-1 bg-brand-black">
@@ -238,5 +255,310 @@ export function ScheduleScreen() {
 
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function DesktopView({ 
+  viewDate, 
+  setViewDate, 
+  activeView, 
+  setActiveView,
+  selectedDate,
+  setSelectedDate
+}: { 
+  viewDate: Date, 
+  setViewDate: (d: Date) => void,
+  activeView: 'day' | 'week' | 'month',
+  setActiveView: (v: 'day' | 'week' | 'month') => void,
+  selectedDate: string,
+  setSelectedDate: (s: string) => void
+}) {
+  return (
+    <View className="flex-1 bg-deep-black">
+      {/* Main Content Area */}
+      <View className="flex-1">
+        {/* Top Header */}
+        <View className="h-20 border-b border-gunmetal flex-row items-center justify-between px-10">
+          <View className="flex-row items-center gap-6">
+            <Text className="text-metallic-gold text-2xl font-bold mr-4">Talego</Text>
+            
+            <View className="flex-row items-center gap-4">
+              <Text className="text-white text-xl font-bold">
+                {viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </Text>
+              <View className="flex-row bg-midnight-charcoal border border-gunmetal rounded-lg">
+                <TouchableOpacity className="p-2 border-r border-gunmetal">
+                  <ChevronLeft size={16} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity className="p-2">
+                  <ChevronRight size={16} color="white" />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity className="bg-metallic-gold px-4 py-1.5 rounded-lg">
+                <Text className="text-deep-black font-bold text-sm">Today</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Navigation Toggles (Moved to Header) */}
+          <View className="bg-midnight-charcoal/50 p-1 rounded-xl flex-row border border-gunmetal w-64">
+            {(['day', 'week', 'month'] as const).map((v) => (
+              <TouchableOpacity 
+                key={v}
+                onPress={() => setActiveView(v)}
+                className={`flex-1 py-1.5 items-center rounded-lg border ${activeView === v ? 'bg-metallic-gold border-metallic-gold' : 'border-transparent hover:border-metallic-gold'}`}
+              >
+                <Text className={`capitalize font-bold text-xs ${activeView === v ? 'text-deep-black' : 'text-muted-silver'}`}>
+                  {v}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          
+          <TouchableOpacity className="flex-row items-center gap-2 bg-midnight-charcoal border border-gunmetal px-4 py-2 rounded-xl">
+             <CalendarPlus size={18} color="#D4AF37" />
+             <Text className="text-white font-bold">Add Shift</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView className="flex-1">
+          {activeView === 'day' && <DayView selectedDate={selectedDate} />}
+          {activeView === 'week' && <WeekView viewDate={viewDate} />}
+          {activeView === 'month' && <MonthView viewDate={viewDate} />}
+        </ScrollView>
+      </View>
+    </View>
+  );
+}
+
+function DayView({ selectedDate }: { selectedDate: string }) {
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const activeShift = SHIFTS_MOCK.find(s => s.date === selectedDate);
+  const currentHour = new Date().getHours();
+  const currentMinute = new Date().getMinutes();
+
+  return (
+    <View className="flex-row">
+      <View className="flex-1 p-10">
+        <View className="flex-row">
+          {/* Time Axis */}
+          <View className="w-20 items-end pr-4">
+            {hours.map(h => (
+              <View key={h} className="h-20 justify-start">
+                <Text className="text-muted-silver text-xs lowercase">
+                  {h === 0 ? '12 am' : h < 12 ? `${h} am` : h === 12 ? '12 pm' : `${h - 12} pm`}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Grid Area */}
+          <View className="flex-1 relative border-l border-gunmetal">
+            {hours.map(h => (
+              <View key={h} className="h-20 border-b border-gunmetal/30" />
+            ))}
+
+            {/* Current Time Indicator */}
+            <View 
+              className="absolute left-0 right-0 h-[2px] bg-metallic-gold"
+              style={{ top: (currentHour * 80) + (currentMinute / 60 * 80) }}
+            >
+              <View className="w-3 h-3 rounded-full bg-metallic-gold shadow-[0_0_10px_#D4AF37] absolute -left-[7px] -top-[5px]" />
+            </View>
+
+            {/* Shift Block */}
+            {activeShift && activeShift.type !== 'leave' && (
+               <View 
+                 className="absolute left-4 right-10 rounded-xl overflow-hidden border-l-[3px] border-metallic-gold bg-gradient-to-b from-midnight-charcoal to-deep-black shadow-lg shadow-black/50"
+                 style={{ 
+                   top: 9 * 80, // Mock 9 AM
+                   height: 9 * 80, // Mock 9 hours duration
+                   padding: 20
+                 }}
+               >
+                  <Text className="text-white text-lg font-bold">Shift: {activeShift.role || 'Work'}</Text>
+                  <Text className="text-metallic-gold font-bold mt-1">{activeShift.start_time} - {activeShift.end_time}</Text>
+                  <Text className="text-muted-silver mt-4 text-sm flex-row items-center gap-2">
+                     {activeShift.location}
+                  </Text>
+               </View>
+            )}
+
+            {/* Empty State if no shift */}
+            {!activeShift && (
+              <View className="absolute inset-x-0 top-40 items-center">
+                 <View className="w-40 h-40 opacity-40 items-center justify-center">
+                    <View className="absolute inset-0 border-[1px] border-metallic-gold rounded-full opacity-20" />
+                    <Clock size={64} color="#D4AF37" strokeWidth={1} />
+                    {/* Subtle sun/cup illustration mock */}
+                    <View className="absolute -top-4 -right-4">
+                       <Plus size={24} color="#D4AF37" />
+                    </View>
+                 </View>
+                 <Text className="text-metallic-gold text-3xl font-bold mt-8 tracking-tight">Rest Day</Text>
+                 <Text className="text-muted-silver mt-3 italic text-lg">Enjoy your well-deserved break</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+
+      {/* Right Sidebar (Only in Day View) */}
+      <View className="w-80 border-l border-gunmetal p-6 bg-midnight-charcoal">
+        {/* Mini Month Placeholder */}
+        <View className="mb-10">
+          <Text className="text-muted-silver text-xs font-bold uppercase tracking-widest mb-4">Calendar</Text>
+          <View className="items-center justify-center p-4 border border-gunmetal rounded-2xl border-dashed">
+            <CalendarIcon color="#A0A0A0" size={32} />
+            <Text className="text-muted-silver text-xs mt-2">Mini Month View</Text>
+          </View>
+        </View>
+
+        {/* Who's Working Segment */}
+        <View>
+          <Text className="text-muted-silver text-xs font-bold uppercase tracking-widest mb-4">Who's working</Text>
+          <View className="flex-row flex-wrap gap-2">
+            {TEAM_MEMBERS.map(m => (
+              <View key={m.id} className="w-10 h-10 rounded-full border border-metallic-gold p-0.5">
+                <Image source={{ uri: m.avatar }} className="w-full h-full rounded-full" />
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function WeekView({ viewDate }: { viewDate: Date }) {
+  const weekDates = generateWeekDates(viewDate, 0).slice(0, 7);
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const today = formatDateISO(new Date());
+
+  return (
+    <View className="flex-1">
+      {/* Week Header */}
+      <View className="flex-row border-b border-gunmetal">
+        <View className="w-20" />
+        {weekDates.map((d) => (
+          <View key={d.fullDate} className="flex-1 items-center py-4 border-l border-gunmetal">
+            <Text className="text-muted-silver text-xs font-bold uppercase mb-2">{d.dayName}</Text>
+            <View className={`w-10 h-10 items-center justify-center rounded-full ${d.fullDate === today ? 'bg-metallic-gold' : ''}`}>
+              <Text className={`text-lg font-bold ${d.fullDate === today ? 'text-deep-black' : 'text-white'}`}>
+                {d.dayNumber}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </View>
+
+      {/* Week Grid */}
+      <ScrollView>
+        <View className="flex-row">
+          <View className="w-20 items-end pr-4 py-2">
+             {hours.map(h => (
+               <View key={h} className="h-16">
+                 <Text className="text-muted-silver text-[10px]">{h}:00</Text>
+               </View>
+             ))}
+          </View>
+          {weekDates.map((d) => {
+            const dayShifts = SHIFTS_MOCK.filter(s => s.date === d.fullDate && s.type !== 'leave');
+            return (
+              <View key={d.fullDate} className="flex-1 border-l border-gunmetal/30 relative">
+                {hours.map(h => (
+                  <View key={h} className="h-16 border-b border-gunmetal/10" />
+                ))}
+                
+                {/* Shift Glow and Blocks */}
+                {dayShifts.map((s, idx) => (
+                  <View 
+                    key={s.id}
+                    className={`absolute inset-x-2 rounded-lg border-l-2 border-metallic-gold bg-midnight-charcoal/80 p-2 shadow-lg ${s.status === 'Pending' ? 'border-dashed' : ''} ${s.status === 'Conflict' ? 'border-red-600' : ''}`}
+                    style={{ 
+                      top: 9 * 64 + (idx * 10), // Mock 9 AM start with offset for overlap
+                      height: 8 * 64, // Mock 8h duration
+                      zIndex: 10 + idx
+                    }}
+                  >
+                    <Text className="text-[10px] font-bold text-white truncate">{s.role}</Text>
+                    {/* Semi-transparent gold overlay for overlap (Mocking if idx > 0) */}
+                    {idx > 0 && (
+                      <View className="absolute inset-0 bg-metallic-gold/10 pointer-events-none" />
+                    )}
+                  </View>
+                ))}
+
+                {/* Shift Glow Effect */}
+                {dayShifts.length > 0 && (
+                  <View className="absolute inset-x-0 top-1/4 bottom-1/4 bg-metallic-gold/5 shadow-[0_0_20px_rgba(212,175,55,0.05)] pointer-events-none" />
+                )}
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+function MonthView({ viewDate }: { viewDate: Date }) {
+  const startOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+  const endOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0);
+  const daysInMonth = Array.from({ length: endOfMonth.getDate() }, (_, i) => i + 1);
+  const today = formatDateISO(new Date());
+
+  // Fill in empty days before start of month
+  const firstDayIndex = (startOfMonth.getDay() + 6) % 7; // Monday start
+  const paddingDays = Array.from({ length: firstDayIndex }, (_, i) => null);
+  const allDays = [...paddingDays, ...daysInMonth];
+
+  return (
+    <View className="p-10 flex-row flex-wrap gap-[-1px]">
+       {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+         <View key={day} className="w-[14.28%] border border-gunmetal bg-midnight-charcoal py-4 items-center">
+            <Text className="text-muted-silver text-xs font-bold uppercase">{day}</Text>
+         </View>
+       ))}
+       {allDays.map((day, idx) => {
+         const d = day ? new Date(viewDate.getFullYear(), viewDate.getMonth(), day) : null;
+         const dateISO = d ? formatDateISO(d) : null;
+         const isToday = dateISO === today;
+         const dayShifts = dateISO ? SHIFTS_MOCK.filter(s => s.date === dateISO) : [];
+
+         return (
+           <View 
+            key={idx} 
+            className={`w-[14.28%] h-32 border border-gunmetal p-3 ${day ? 'bg-deep-black' : 'bg-midnight-charcoal/30'}`}
+           >
+             {day && (
+               <>
+                 <View className={`w-8 h-8 items-center justify-center rounded-lg ${isToday ? 'border-2 border-metallic-gold' : ''}`}>
+                   <Text className={`text-sm font-bold ${isToday ? 'text-metallic-gold' : 'text-white'}`}>{day}</Text>
+                 </View>
+                 
+                 <View className="mt-auto flex-row flex-wrap justify-center gap-1.5 pb-2">
+                    {dayShifts.map(s => {
+                      if (s.type === 'shift') {
+                        return (
+                          <View 
+                            key={s.id} 
+                            className={`w-2 h-2 rounded-full ${s.status === 'Conflict' ? 'bg-red-600' : 'bg-metallic-gold'} shadow-[0_0_5px_rgba(212,175,55,0.4)]`} 
+                          />
+                        );
+                      }
+                      return (
+                        <View key={s.id} className="w-8 h-1 rounded-full bg-gunmetal/80 border border-muted-silver/10 overflow-hidden">
+                           <View className="absolute inset-0 bg-white/5 opacity-50" />
+                        </View>
+                      );
+                    })}
+                 </View>
+               </>
+             )}
+           </View>
+         );
+       })}
+    </View>
   );
 }
