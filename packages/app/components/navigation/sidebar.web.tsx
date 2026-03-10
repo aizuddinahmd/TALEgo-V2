@@ -212,7 +212,6 @@ export function Sidebar() {
           badge: annualLeaveRemaining > 0 ? `${annualLeaveRemaining}d` : undefined
         },
         { id: 'claims', name: 'Claims', path: '/record/claims' },
-        { id: 'bill', name: 'Track Bill', path: '/record/bill' },
       ]
     },
     { id: 'schedule', name: 'Schedule', icon: Calendar, path: '/schedule' },
