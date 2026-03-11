@@ -6,6 +6,8 @@ import { Svg, Circle, G, Text as SvgText } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { clockIn, clockOut, getTodayAttendance } from '../../api/attendance';
 import { getStaffProfile, fetchLeaveBalances } from '../../api/records';
+import { LeaveApplicationModal } from '../my-record/LeaveApplicationModal';
+import { ClaimApplicationModal } from '../my-record/ClaimApplicationModal';
 
 export const NOTIFICATIONS = [
   { id: '1', title: 'Leave Approved', time: '10 mins ago', icon: CheckCircle, color: 'text-green-500 dark:text-green-400' },
@@ -90,6 +92,8 @@ export function EmployeeOverview() {
   const [leaveBalances, setLeaveBalances] = useState<any[]>([]);
   const [staffInfo, setStaffInfo] = useState<any>(null);
   const [nextShift, setNextShift] = useState<any>(null);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   const isRestMode = attendanceStatus === 'on_leave' || !todayShift;
 
@@ -351,9 +355,22 @@ export function EmployeeOverview() {
                         shadowRadius: 12,
                         elevation: 10,
                       }}
-                      onPress={() => console.log('Apply Leave')}
+                      onPress={() => setIsLeaveModalOpen(true)}
                     >
                       <Text className="text-brand-black font-bold text-xs uppercase tracking-tight">Apply Leave</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      className="flex-1 bg-brand-gold rounded-xl py-4 items-center justify-center active:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+                      style={{
+                        shadowColor: '#D4AF37',
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.5,
+                        shadowRadius: 12,
+                        elevation: 10,
+                      }}
+                      onPress={() => setIsClaimModalOpen(true)}
+                    >
+                      <Text className="text-brand-black font-bold text-xs uppercase tracking-tight">Apply Claim</Text>
                     </TouchableOpacity>
                     <TouchableOpacity 
                       className="flex-1 bg-brand-gold rounded-xl py-4 items-center justify-center active:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.4)]"
@@ -438,11 +455,32 @@ export function EmployeeOverview() {
                 shadowRadius: 12,
                 elevation: 10, // Some standard shadow for android
               }}
+              onPress={() => setIsLeaveModalOpen(true)}
             >
               <Text className="text-brand-black font-bold text-sm uppercase tracking-tight">Request leave</Text>
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Modals */}
+        {staffInfo && (
+          <>
+            <LeaveApplicationModal
+              isOpen={isLeaveModalOpen}
+              onClose={() => setIsLeaveModalOpen(false)}
+              staffId={staffInfo.staff_id}
+              orgId={staffInfo.org_id}
+              onSuccess={() => fetchStatus()}
+            />
+            <ClaimApplicationModal
+              isOpen={isClaimModalOpen}
+              onClose={() => setIsClaimModalOpen(false)}
+              staffId={staffInfo.staff_id}
+              orgId={staffInfo.org_id}
+              onSuccess={() => fetchStatus()}
+            />
+          </>
+        )}
 
         {/* Top Section Part 2 (Notifications) */}
         <View className="mb-8">
